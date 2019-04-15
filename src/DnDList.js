@@ -1,29 +1,34 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import DnDElement from './DnDElement';
+import React from 'react'
+import DnDElement from './DnDElement'
 
 class DnDList extends React.Component {
-  // constructor(props) {
-  //   super(props)
-  // }
+  constructor(props) {
+    super(props)
+    this.swap = this.swap.bind(this)
+    this.state = {
+      list: ['1', '2', '3', '4', '5']
+    }
+  }
+
+  swap(a, b) {
+    let list = this.state.list.slice()
+    ;[list[a], list[b]] = [list[b], list[a]] // swap
+    this.setState({ list })
+  }
 
   render() {
-    const list = this.props.list.map((idx, el) => (
-      <DnDElement key={idx}>
+    const list = this.state.list.map((el, idx) => (
+      <DnDElement
+        index={idx}
+        swap={this.swap}
+        key={idx}
+      >
         {el}
       </DnDElement>
-    ));
+    ))
 
-    return (
-      <ul>
-        {list}
-      </ul>
-    )
+    return <ul>{list}</ul>
   }
-}
-
-DnDList.propTypes = {
-  list: PropTypes.array
 }
 
 export default DnDList

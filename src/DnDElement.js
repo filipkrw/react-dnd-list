@@ -1,8 +1,9 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 
 class DnDElement extends React.Component {
   constructor(props) {
-    super(props);
+    super(props)
 
     this.state = {
       drag: false,
@@ -10,23 +11,41 @@ class DnDElement extends React.Component {
       offsetY: 0
     }
 
-    this.handleDragStart = this.handleDragStart.bind(this);
-    this.handleDragEnd = this.handleDragEnd.bind(this);
-    this.handleDrag = this.handleDrag.bind(this);
+    this.ref = React.createRef()
+
+    this.handleDragStart = this.handleDragStart.bind(this)
+    this.handleDragEnd = this.handleDragEnd.bind(this)
+    this.handleDrag = this.handleDrag.bind(this)
+  }
+
+  componentDidMount() {
+    this.height = this.ref.current.offsetHeight
   }
 
   handleDragStart(event) {
-    document.onmousemove = this.handleDrag;
-    this.setState({ drag: true, originY: event.clientY });
+    document.onmousemove = this.handleDrag
+    this.setState({
+      drag: true,
+      originY: event.clientY,
+      offsetY: 0
+    })
   }
 
   handleDragEnd() {
-    document.onmousemove = null;
-    this.setState({ drag: false, offsetY: 0 });
+    document.onmousemove = null
+    this.setState({ drag: false })
   }
 
   handleDrag(event) {
-    this.setState({ offsetY: event.clientY - this.state.originY });
+    const offsetY = event.clientY - this.state.originY
+
+    if (Math.abs(offsetY) > this.height) {
+      const direction = offsetY > 0 ? 1 : -1
+      this.props.swap(this.props.index, this.props.index + direction)
+      this.handleDragEnd()
+    }
+
+    this.setState({ offsetY })
   }
 
   render() {
@@ -40,11 +59,16 @@ class DnDElement extends React.Component {
         style={style}
         onMouseDown={this.handleDragStart}
         onMouseUp={this.handleDragEnd}
+        ref={this.ref}
       >
         {this.props.children}
       </li>
-    );
+    )
   }
+}
+
+DnDElement.propTypes = {
+  index: PropTypes.number
 }
 
 export default DnDElement
