@@ -20,8 +20,9 @@ class DnDList extends React.Component {
     const list = this.state.list.map((el, idx) => (
       <DnDElement
         index={idx}
+        last={idx === this.state.list.length - 1}
         swap={this.swap}
-        key={idx}
+        key={el}
       >
         {el}
       </DnDElement>

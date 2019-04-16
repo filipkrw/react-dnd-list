@@ -32,26 +32,34 @@ class DnDElement extends React.Component {
   }
 
   handleDragEnd() {
+    console.log('handleDragEnd')
     document.onmousemove = null
     this.setState({ drag: false })
   }
 
   handleDrag(event) {
-    const offsetY = event.clientY - this.state.originY
+    let offsetY = event.clientY - this.state.originY
 
-    if (Math.abs(offsetY) > this.height) {
-      const direction = offsetY > 0 ? 1 : -1
-      this.props.swap(this.props.index, this.props.index + direction)
-      this.handleDragEnd()
+    if (this.props.last && offsetY > 10) {
+      offsetY = 10
+    } else if (this.props.index === 0 && offsetY < -10) {
+      offsetY = -10
     }
 
-    this.setState({ offsetY })
+    if (Math.abs(offsetY) >= this.height) {
+      const direction = offsetY > 0 ? 1 : -1
+      this.props.swap(this.props.index, this.props.index + direction)
+      this.setState({ offsetY: 0, originY: event.clientY })
+    } else {
+      this.setState({ offsetY })
+    }
   }
 
   render() {
     const style = this.state.drag ? {
       position: 'relative',
-      top: this.state.offsetY
+      top: this.state.offsetY,
+      background: '#3d0808'
     } : {}
 
     return (
@@ -59,6 +67,9 @@ class DnDElement extends React.Component {
         style={style}
         onMouseDown={this.handleDragStart}
         onMouseUp={this.handleDragEnd}
+        onMouseLeave={this.hansdleDragEnd}
+        onTouchStart={this.handleDragStart}
+        onTouchEnd={this.handleDragEnd}
         ref={this.ref}
       >
         {this.props.children}

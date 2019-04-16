@@ -10,7 +10,8 @@ ul {
   border: 1px solid #333;
   border-radius: 4px;
   overflow: hidden;
-  
+  /* background: #111; */
+
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   -khtml-user-select: none;
@@ -22,6 +23,9 @@ ul {
 li {
   padding: 20px;
   border-bottom: 1px solid #333;
+  border-top: 1px solid #333;
+  margin-bottom: -1px;
+  background: #000;
 }
 
 li:last-child {
@@ -29,6 +33,6 @@ li:last-child {
 }
 
 li:hover {
-  background: #3d0808;
+  background: #111;
   cursor: pointer;
 }
