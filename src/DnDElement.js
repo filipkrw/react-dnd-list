@@ -8,7 +8,8 @@ class DnDElement extends React.Component {
     this.state = {
       drag: false,
       originY: null,
-      offsetY: 0
+      offsetY: 0,
+      posY: null
     }
 
     this.ref = React.createRef()
@@ -20,39 +21,43 @@ class DnDElement extends React.Component {
 
   componentDidMount() {
     this.height = this.ref.current.offsetHeight
+    this.bounds = this.ref.current.getBoundingClientRect()
+    console.log(this.bounds)
   }
 
   handleDragStart(event) {
     document.onmousemove = this.handleDrag
+    console.log(event.clientY)
     this.setState({
       drag: true,
       originY: event.clientY,
-      offsetY: 0
+      offsetY: 0,
+      posY: event.clientY
     })
   }
 
   handleDragEnd() {
-    console.log('handleDragEnd')
     document.onmousemove = null
     this.setState({ drag: false })
   }
 
   handleDrag(event) {
     let offsetY = event.clientY - this.state.originY
+    this.setState({ offsetY })
 
-    if (this.props.last && offsetY > 10) {
-      offsetY = 10
-    } else if (this.props.index === 0 && offsetY < -10) {
-      offsetY = -10
-    }
-
-    if (Math.abs(offsetY) >= this.height) {
-      const direction = offsetY > 0 ? 1 : -1
-      this.props.swap(this.props.index, this.props.index + direction)
-      this.setState({ offsetY: 0, originY: event.clientY })
-    } else {
-      this.setState({ offsetY })
-    }
+    // if (this.props.last && offsetY > 10) {
+    //   offsetY = 10
+    // } else if (this.props.index === 0 && offsetY < -10) {
+    //   offsetY = -10
+    // }
+    //
+    // if (Math.abs(offsetY) >= this.height) {
+    //   const direction = offsetY > 0 ? 1 : -1
+    //   this.props.swap(this.props.index, this.props.index + direction)
+    //   this.setState({ offsetY: 0, originY: event.clientY })
+    // } else {
+    //   this.setState({ offsetY })
+    // }
   }
 
   render() {
