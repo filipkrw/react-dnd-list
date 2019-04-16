@@ -10,7 +10,8 @@ ul {
   border: 1px solid #333;
   border-radius: 4px;
   overflow: hidden;
-  
+  background: #111;
+
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   -khtml-user-select: none;
@@ -22,6 +23,8 @@ ul {
 li {
   padding: 20px;
   border-bottom: 1px solid #333;
+  background: #000;
+  /* transition: top .3s; */
 }
 
 li:last-child {

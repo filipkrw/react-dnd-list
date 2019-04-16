@@ -8,7 +8,8 @@ class DnDElement extends React.Component {
     this.state = {
       drag: false,
       originY: null,
-      offsetY: 0
+      offsetY: 0,
+      step: 0
     }
 
     this.ref = React.createRef()
@@ -23,15 +24,18 @@ class DnDElement extends React.Component {
   }
 
   handleDragStart(event) {
+    this.props.activate(this.height)
     document.onmousemove = this.handleDrag
     this.setState({
       drag: true,
       originY: event.clientY,
-      offsetY: 0
+      offsetY: 0,
+      step: 0
     })
   }
 
   handleDragEnd() {
+    this.props.deactivate()
     document.onmousemove = null
     this.setState({ drag: false })
   }
@@ -39,11 +43,24 @@ class DnDElement extends React.Component {
   handleDrag(event) {
     const offsetY = event.clientY - this.state.originY
 
-    if (Math.abs(offsetY) > this.height) {
-      const direction = offsetY > 0 ? 1 : -1
-      this.props.swap(this.props.index, this.props.index + direction)
-      this.handleDragEnd()
+    const relOriginY = this.height * this.state.step
+
+    if (offsetY >= relOriginY + this.height) {
+      this.props.setStep(1)
+      this.setState({ step: this.state.step + 1, offsetY })
+    } else if (offsetY <= relOriginY - this.height) {
+      this.props.setStep(-1)
+      this.setState({ step: this.state.step - 1, offsetY })
     }
+
+    // const round = offsetY > 0 ? Math.floor : Math.ceil
+    // this.props.setStep(round(offsetY / this.height))
+
+    // if (Math.abs(offsetY) > this.height) {
+    //   const direction = offsetY > 0 ? 1 : -1
+    //   this.props.swap(this.props.index, this.props.index + direction)
+    //   this.handleDragEnd()
+    // }
 
     this.setState({ offsetY })
   }
@@ -51,12 +68,12 @@ class DnDElement extends React.Component {
   render() {
     const style = this.state.drag ? {
       position: 'relative',
-      top: this.state.offsetY
-    } : {}
-
+      top: this.state.offsetY,
+      zIndex: 200
+    } : null
     return (
       <li
-        style={style}
+        style={style || this.props.style}
         onMouseDown={this.handleDragStart}
         onMouseUp={this.handleDragEnd}
         ref={this.ref}
