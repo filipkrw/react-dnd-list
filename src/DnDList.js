@@ -8,6 +8,7 @@ class DnDList extends React.Component {
     super(props)
 
     this.state = {
+      drag: false,
       activeIndex: null,
       activeHeight: null,
       step: null

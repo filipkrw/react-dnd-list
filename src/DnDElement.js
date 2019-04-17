@@ -7,6 +7,8 @@ class DnDElement extends React.Component {
 
     this.state = {
       drag: false,
+      drop: false,
+      transition: false,
       origin: null,
       offset: 0
     }
@@ -16,19 +18,38 @@ class DnDElement extends React.Component {
     this.handleDragStart = this.handleDragStart.bind(this)
     this.handleDragEnd = this.handleDragEnd.bind(this)
     this.handleDrag = this.handleDrag.bind(this)
+    this.transitionEnd = this.transitionEnd.bind(this)
   }
 
   componentDidMount() {
-    const dimensions = this.ref.current.getBoundingClientRect()
-    this.height = dimensions.height
+    this.bounds = this.ref.current.getBoundingClientRect()
+  }
+
+  componentDidUpdate() {
+    if (this.state.drop) {
+      // there's no bug with setTimeout for some reason,
+      // even when it's set to 0 seconds
+      // setTimeout(this.transitionEnd, 0)
+      this.transitionEnd()
+    }
+  }
+
+  transitionEnd() {
+    this.setState({
+      drop: false,
+      transition: true,
+
+      offset: 0
+    })
   }
 
   handleDragStart(event) {
-    this.props.activate(this.height)
     document.onmousemove = this.handleDrag
+    this.props.activate(this.bounds.height)
 
     this.setState({
       drag: true,
+
       origin: event.clientY,
       offset: 0,
       step: 0
@@ -37,24 +58,23 @@ class DnDElement extends React.Component {
 
   handleDragEnd() {
     document.onmousemove = null
+    this.props.deactivate()
 
     this.setState({
-      offset: this.state.offset - (this.props.step * this.height),
-      drag: false
+      drop: true,
+      offset: Math.round(this.state.offset - (this.props.step * this.bounds.height))
     })
-
-    this.props.deactivate()
   }
 
   handleDrag(event) {
     const offset = event.clientY - this.state.origin
-    const originOffset = this.height * this.props.step
+    const originOffset = this.bounds.height * this.props.step
 
-    if (offset >= originOffset + this.height) {
+    if (offset >= originOffset + this.bounds.height) {
       this.props.setStep(this.props.step + 1)
     }
 
-    else if (offset <= originOffset - this.height) {
+    else if (offset <= originOffset - this.bounds.height) {
       this.props.setStep(this.props.step - 1)
     }
 
@@ -64,6 +84,7 @@ class DnDElement extends React.Component {
   render() {
     let classes = ['draggable']
     this.state.drag && classes.push('in-drag')
+    this.state.transition && classes.push('top-transition')
 
     const offset = this.state.drag
       ? this.state.offset
