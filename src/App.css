@@ -23,6 +23,7 @@ ul {
 li {
   padding: 20px;
   border-bottom: 1px solid #333;
+  border-top: 1px solid #333;
   background: #000;
   /* transition: top .3s; */
 }
@@ -34,4 +35,22 @@ li:last-child {
 li:hover {
   background: #3d0808;
   cursor: pointer;
+}
+
+.top-transition {
+  transition: top .3s;
+}
+
+.no-top-transition {
+  transition: top 0s;
+}
+
+.draggable {
+  position: relative;
+  z-index: 100;
+  top: 0;
+}
+
+.in-drag {
+  z-index: 101;
 }

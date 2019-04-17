@@ -7,9 +7,8 @@ class DnDElement extends React.Component {
 
     this.state = {
       drag: false,
-      originY: null,
-      offsetY: 0,
-      step: 0
+      origin: null,
+      offset: 0
     }
 
     this.ref = React.createRef()
@@ -20,65 +19,67 @@ class DnDElement extends React.Component {
   }
 
   componentDidMount() {
-    this.height = this.ref.current.offsetHeight
+    const dimensions = this.ref.current.getBoundingClientRect()
+    this.height = dimensions.height
   }
 
   handleDragStart(event) {
     this.props.activate(this.height)
     document.onmousemove = this.handleDrag
+
     this.setState({
       drag: true,
-      originY: event.clientY,
-      offsetY: 0,
+      origin: event.clientY,
+      offset: 0,
       step: 0
     })
   }
 
   handleDragEnd() {
-    this.props.deactivate()
     document.onmousemove = null
-    this.setState({ drag: false })
+
+    this.setState({
+      offset: this.state.offset - (this.props.step * this.height),
+      drag: false
+    })
+
+    this.props.deactivate()
   }
 
   handleDrag(event) {
-    const offsetY = event.clientY - this.state.originY
+    const offset = event.clientY - this.state.origin
+    const originOffset = this.height * this.props.step
 
-    const relOriginY = this.height * this.state.step
-
-    if (offsetY >= relOriginY + this.height) {
-      this.props.setStep(1)
-      this.setState({ step: this.state.step + 1, offsetY })
-    } else if (offsetY <= relOriginY - this.height) {
-      this.props.setStep(-1)
-      this.setState({ step: this.state.step - 1, offsetY })
+    if (offset >= originOffset + this.height) {
+      this.props.setStep(this.props.step + 1)
     }
 
-    // const round = offsetY > 0 ? Math.floor : Math.ceil
-    // this.props.setStep(round(offsetY / this.height))
+    else if (offset <= originOffset - this.height) {
+      this.props.setStep(this.props.step - 1)
+    }
 
-    // if (Math.abs(offsetY) > this.height) {
-    //   const direction = offsetY > 0 ? 1 : -1
-    //   this.props.swap(this.props.index, this.props.index + direction)
-    //   this.handleDragEnd()
-    // }
-
-    this.setState({ offsetY })
+    this.setState({ offset })
   }
 
   render() {
-    const style = this.state.drag ? {
-      position: 'relative',
-      top: this.state.offsetY,
-      zIndex: 200
-    } : null
+    let classes = ['draggable']
+    this.state.drag && classes.push('in-drag')
+
+    const offset = this.state.drag
+      ? this.state.offset
+      : this.props.offset
+
     return (
       <li
-        style={style || this.props.style}
+        id={this.props.element}
+        className={classes.join(' ')}
+        style={{ top: offset }}
+
         onMouseDown={this.handleDragStart}
         onMouseUp={this.handleDragEnd}
         ref={this.ref}
       >
-        {this.props.children}
+        {this.props.value}
       </li>
     )
   }

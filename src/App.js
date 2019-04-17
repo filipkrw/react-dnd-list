@@ -7,7 +7,7 @@ class App extends Component {
   render() {
     return (
       <div>
-        <DnDList />
+        <DnDList list={['1', '2', '3', '4', '5']} />
       </div>
     );
   }
