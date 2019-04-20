@@ -18,7 +18,6 @@ class DnDElement extends React.Component {
     this.handleDragStart = this.handleDragStart.bind(this)
     this.handleDragEnd = this.handleDragEnd.bind(this)
     this.handleDrag = this.handleDrag.bind(this)
-    this.transitionEnd = this.transitionEnd.bind(this)
   }
 
   componentDidMount() {
@@ -27,20 +26,19 @@ class DnDElement extends React.Component {
 
   componentDidUpdate() {
     if (this.state.drop) {
-      // there's no bug with setTimeout for some reason,
-      // even when it's set to 0 seconds
-      // setTimeout(this.transitionEnd, 0)
-      this.transitionEnd()
+      window.requestAnimationFrame(() => {
+        this.setState({
+          drop: false,
+          transition: true,
+          offset: 0
+        })
+      });
+
+      this.ref.current.ontransitionend = () => {
+        this.ref.current.ontransitionend = null
+        this.setState({ drag: false, transition: false })
+      }
     }
-  }
-
-  transitionEnd() {
-    this.setState({
-      drop: false,
-      transition: true,
-
-      offset: 0
-    })
   }
 
   handleDragStart(event) {
@@ -49,7 +47,6 @@ class DnDElement extends React.Component {
 
     this.setState({
       drag: true,
-
       origin: event.clientY,
       offset: 0,
       step: 0
@@ -84,7 +81,10 @@ class DnDElement extends React.Component {
   render() {
     let classes = ['draggable']
     this.state.drag && classes.push('in-drag')
-    this.state.transition && classes.push('top-transition')
+
+    if (this.props.transition || this.state.transition) {
+      classes.push('top-transition')
+    }
 
     const offset = this.state.drag
       ? this.state.offset

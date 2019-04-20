@@ -42,17 +42,19 @@ class DnDList extends React.Component {
 
   render() {
     const list = this.props.list.map((value, index) => {
-      let offset = 0
-      const activeIndex = this.state.activeIndex
+      const activeIx = this.state.activeIndex
 
-      if (
-        activeIndex !== null &&
-        activeIndex !== index &&
-        isInRange(index, activeIndex, activeIndex + this.state.step)
-      ) {
-        offset = this.state.step < 0
-          ? this.state.activeHeight
-          : -this.state.activeHeight
+      let offset = 0
+      let transition = false
+
+      if (activeIx !== null && activeIx !== index) {
+        transition = true
+
+        if (isInRange(index, activeIx, activeIx + this.state.step)) {
+          offset = this.state.step < 0
+            ? this.state.activeHeight
+            : -this.state.activeHeight
+        }
       }
 
       return (
@@ -62,6 +64,7 @@ class DnDList extends React.Component {
           value={value}
 
           offset={offset}
+          transition={transition}
           step={this.state.step}
           setStep={this.setStep}
           activate={this.activate.bind(this, index)}
