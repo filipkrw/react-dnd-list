@@ -10,7 +10,7 @@ ul {
   border: 1px solid #333;
   border-radius: 4px;
   overflow: hidden;
-  /* background: #111; */
+  background: #111;
 
   -webkit-touch-callout: none;
   -webkit-user-select: none;
@@ -24,7 +24,6 @@ li {
   padding: 20px;
   border-bottom: 1px solid #333;
   border-top: 1px solid #333;
-  margin-bottom: -1px;
   background: #000;
 }
 
@@ -35,4 +34,23 @@ li:last-child {
 li:hover {
   background: #111;
   cursor: pointer;
+}
+
+.top-transition {
+  transition: top .2s ease-out;
+}
+
+.no-top-transition {
+  transition: top 0s;
+}
+
+.draggable {
+  position: relative;
+  z-index: 100;
+  top: 0;
+}
+
+.in-drag {
+  background: #001b47;
+  z-index: 101;
 }

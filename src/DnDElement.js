@@ -7,9 +7,10 @@ class DnDElement extends React.Component {
 
     this.state = {
       drag: false,
-      originY: null,
-      offsetY: 0,
-      posY: null
+      drop: false,
+      transition: false,
+      origin: null,
+      offset: 0
     }
 
     this.ref = React.createRef()
@@ -20,56 +21,81 @@ class DnDElement extends React.Component {
   }
 
   componentDidMount() {
-    this.height = this.ref.current.offsetHeight
     this.bounds = this.ref.current.getBoundingClientRect()
-    console.log(this.bounds)
+  }
+
+  componentDidUpdate() {
+    if (this.state.drop) {
+      window.requestAnimationFrame(() => {
+        this.setState({
+          drop: false,
+          transition: true,
+          offset: 0
+        })
+      });
+
+      this.ref.current.ontransitionend = () => {
+        this.ref.current.ontransitionend = null
+        this.setState({ drag: false, transition: false })
+      }
+    }
   }
 
   handleDragStart(event) {
     document.onmousemove = this.handleDrag
-    console.log(event.clientY)
+    this.props.activate(this.bounds.height)
+
     this.setState({
       drag: true,
-      originY: event.clientY,
-      offsetY: 0,
-      posY: event.clientY
+      origin: event.clientY,
+      offset: 0,
+      step: 0
     })
   }
 
   handleDragEnd() {
     document.onmousemove = null
-    this.setState({ drag: false })
+    this.props.deactivate()
+
+    this.setState({
+      drop: true,
+      offset: Math.round(this.state.offset - (this.props.step * this.bounds.height))
+    })
   }
 
   handleDrag(event) {
-    let offsetY = event.clientY - this.state.originY
-    this.setState({ offsetY })
+    const offset = event.clientY - this.state.origin
+    const originOffset = this.bounds.height * this.props.step
 
-    // if (this.props.last && offsetY > 10) {
-    //   offsetY = 10
-    // } else if (this.props.index === 0 && offsetY < -10) {
-    //   offsetY = -10
-    // }
-    //
-    // if (Math.abs(offsetY) >= this.height) {
-    //   const direction = offsetY > 0 ? 1 : -1
-    //   this.props.swap(this.props.index, this.props.index + direction)
-    //   this.setState({ offsetY: 0, originY: event.clientY })
-    // } else {
-    //   this.setState({ offsetY })
-    // }
+    if (offset >= originOffset + this.bounds.height) {
+      this.props.setStep(this.props.step + 1)
+    }
+
+    else if (offset <= originOffset - this.bounds.height) {
+      this.props.setStep(this.props.step - 1)
+    }
+
+    this.setState({ offset })
   }
 
   render() {
-    const style = this.state.drag ? {
-      position: 'relative',
-      top: this.state.offsetY,
-      background: '#3d0808'
-    } : {}
+    let classes = ['draggable']
+    this.state.drag && classes.push('in-drag')
+
+    if (this.props.transition || this.state.transition) {
+      classes.push('top-transition')
+    }
+
+    const offset = this.state.drag
+      ? this.state.offset
+      : this.props.offset
 
     return (
       <li
-        style={style}
+        id={this.props.element}
+        className={classes.join(' ')}
+        style={{ top: offset }}
+
         onMouseDown={this.handleDragStart}
         onMouseUp={this.handleDragEnd}
         onMouseLeave={this.hansdleDragEnd}
@@ -77,7 +103,7 @@ class DnDElement extends React.Component {
         onTouchEnd={this.handleDragEnd}
         ref={this.ref}
       >
-        {this.props.children}
+        {this.props.value}
       </li>
     )
   }
