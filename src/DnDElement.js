@@ -24,19 +24,23 @@ class DnDElement extends React.Component {
     this.bounds = this.ref.current.getBoundingClientRect()
   }
 
-  componentDidUpdate() {
+  componentDidUpdate(prevProps) {
     if (this.state.drop) {
-      window.requestAnimationFrame(() => {
-        this.setState({
-          drop: false,
-          transition: true,
-          offset: 0
-        })
-      });
+      if (this.state.offset === 0) {
+        this.setState({ drop: false, drag: false, transition: false })
+      } else {
+        window.requestAnimationFrame(() => {
+          this.setState({
+            drop: false,
+            transition: true,
+            offset: 0
+          })
+        });
 
-      this.ref.current.ontransitionend = () => {
-        this.ref.current.ontransitionend = null
-        this.setState({ drag: false, transition: false })
+        this.ref.current.ontransitionend = () => {
+          this.ref.current.ontransitionend = null
+          this.setState({ drag: false, transition: false })
+        }
       }
     }
   }
@@ -47,6 +51,7 @@ class DnDElement extends React.Component {
 
     this.setState({
       drag: true,
+      transition: false,
       origin: event.clientY,
       offset: 0,
       step: 0
@@ -59,7 +64,7 @@ class DnDElement extends React.Component {
 
     this.setState({
       drop: true,
-      offset: Math.round(this.state.offset - (this.props.step * this.bounds.height))
+      offset: this.state.offset - (this.props.step * this.bounds.height)
     })
   }
 
@@ -67,11 +72,11 @@ class DnDElement extends React.Component {
     const offset = event.clientY - this.state.origin
     const originOffset = this.bounds.height * this.props.step
 
-    if (offset >= originOffset + this.bounds.height) {
+    if (offset >= originOffset + this.bounds.height - 25) {
       this.props.setStep(this.props.step + 1)
     }
 
-    else if (offset <= originOffset - this.bounds.height) {
+    else if (offset <= originOffset - this.bounds.height + 25) {
       this.props.setStep(this.props.step - 1)
     }
 
@@ -92,7 +97,6 @@ class DnDElement extends React.Component {
 
     return (
       <li
-        id={this.props.element}
         className={classes.join(' ')}
         style={{ top: offset }}
 

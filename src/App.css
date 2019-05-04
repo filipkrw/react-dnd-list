@@ -37,7 +37,7 @@ li:hover {
 }
 
 .top-transition {
-  transition: top .2s ease-out;
+  transition: top .2s;
 }
 
 .no-top-transition {
@@ -51,6 +51,6 @@ li:hover {
 }
 
 .in-drag {
-  background: #001b47;
+  background: #111 !important;
   z-index: 101;
 }
