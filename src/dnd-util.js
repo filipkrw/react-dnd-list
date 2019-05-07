@@ -1,4 +1,4 @@
-export const isInRange = (n, min, max) => {
+export const inRange = (n, min, max) => {
   if (min > max) { [min, max] = [max, min] }
   return n >= min && n <= max
 }
