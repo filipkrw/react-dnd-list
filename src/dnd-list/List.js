@@ -1,7 +1,7 @@
 import React from 'react'
-import DnDElement from './DnDElement'
+import Item from './Item'
 
-import { inRange, shiftArray } from './dnd-util'
+import { inRange, shiftArray } from './util'
 
 const initState = {
   drag: false,
@@ -12,7 +12,7 @@ const initState = {
   step: null
 }
 
-class DnDList extends React.Component {
+class List extends React.Component {
   constructor(props) {
     super(props)
     this.state = initState
@@ -82,7 +82,7 @@ class DnDList extends React.Component {
       }
 
       return (
-        <DnDElement
+        <Item
           key={value}
           index={currentIx}
           value={value}
@@ -101,4 +101,4 @@ class DnDList extends React.Component {
   }
 }
 
-export default DnDList
+export default List

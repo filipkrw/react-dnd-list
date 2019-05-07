@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import './App.css';
+import './dnd-list/styles.css';
 
-import DnDList from './DnDList';
+import DnDList from './dnd-list/List';
 
 class App extends Component {
   render() {

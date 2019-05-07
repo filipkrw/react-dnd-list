@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-class DnDElement extends React.Component {
+class Item extends React.Component {
   constructor(props) {
     super(props)
 
@@ -58,8 +58,8 @@ class DnDElement extends React.Component {
   // }
 }
 
-DnDElement.propTypes = {
+Item.propTypes = {
   index: PropTypes.number
 }
 
-export default DnDElement
+export default Item
