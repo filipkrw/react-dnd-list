@@ -31,31 +31,6 @@ class Item extends React.Component {
       </li>
     )
   }
-
-  // componentDidUpdate() {
-    // if (this.state.drop) {
-    //   if (this.state.offset === 0) {
-    //     this.setState({
-    //       drag: false,
-    //       drop: false,
-    //       transition: false
-    //     })
-    //   } else {
-    //     window.requestAnimationFrame(() => {
-    //       this.setState({
-    //         drop: false,
-    //         transition: true,
-    //         offset: 0
-    //       })
-    //     })
-    //
-    //     this.ref.current.ontransitionend = () => {
-    //       this.ref.current.ontransitionend = null
-    //       this.setState({ drag: false, transition: false })
-    //     }
-    //   }
-    // }
-  // }
 }
 
 Item.propTypes = {
@@ -63,3 +38,28 @@ Item.propTypes = {
 }
 
 export default Item
+
+// componentDidUpdate() {
+  // if (this.state.drop) {
+  //   if (this.state.offset === 0) {
+  //     this.setState({
+  //       drag: false,
+  //       drop: false,
+  //       transition: false
+  //     })
+  //   } else {
+  //     window.requestAnimationFrame(() => {
+  //       this.setState({
+  //         drop: false,
+  //         transition: true,
+  //         offset: 0
+  //       })
+  //     })
+  //
+  //     this.ref.current.ontransitionend = () => {
+  //       this.ref.current.ontransitionend = null
+  //       this.setState({ drag: false, transition: false })
+  //     }
+  //   }
+  // }
+// }
