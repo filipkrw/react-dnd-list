@@ -48,3 +48,7 @@ li:last-child {
   background: #111;
   cursor: pointer;
 }
+
+.long-transition {
+  transition: top 1s;
+}

@@ -74,34 +74,42 @@ class List extends React.Component {
   }
 
   render() {
+    const transitionsClass = this.props.transitionsClass ?
+      this.props.transitionsClass :
+      'dnd-list__transition'
+
     const items = this.props.items.map((value, currentIx) => {
       const draggedIx = this.state.index
       const inDrag = draggedIx === currentIx
 
-      let offset = 0
       let classes = ['dnd-list__draggable']
+      let styles = {}
 
       if (this.state.drag && !inDrag) {
-        this.props.transitions && classes.push('dnd-list__transition')
+        if (this.props.transitions) {
+          classes.push(transitionsClass)
+        }
 
         if (inRange(currentIx, draggedIx, draggedIx + this.state.step)) {
-          offset = this.state.step < 0
+          styles.top = this.state.step < 0
             ? this.state.height
             : -this.state.height
         }
       }
 
       if (inDrag) {
-        offset = this.state.offset
+        styles.top = this.state.offset
         classes.push('dnd-list__in-drag')
-        this.state.drop && classes.push('dnd-list__transition')
+        if (this.state.drop) {
+          classes.push(transitionsClass)
+        }
       }
 
       return <this.ControlledItem
         key={currentIx}
         value={value}
 
-        style={{ top: offset }}
+        style={styles}
         className={classes.join(' ')}
 
         handleDragStart={this.handleDragStart.bind(this, currentIx)}

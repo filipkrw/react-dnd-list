@@ -27,6 +27,7 @@ class App extends React.Component {
           items={['1', '2', '3', '4', '5']}
           itemComponent={ListItem}
           transitions
+          transitionsClass={'long-transition'}
         />
     </ul>
     );
