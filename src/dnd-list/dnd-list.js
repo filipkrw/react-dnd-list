@@ -1,6 +1,8 @@
 import React, { Fragment, useRef } from 'react'
 import { inRange, shiftArray } from './util'
 
+import './styles.css'
+
 const initState = {
   drag: false,
   drop: false,
@@ -77,10 +79,10 @@ class List extends React.Component {
       const inDrag = draggedIx === currentIx
 
       let offset = 0
-      let classes = ['draggable']
+      let classes = ['dnd-list__draggable']
 
       if (this.state.drag && !inDrag) {
-        this.props.transitions && classes.push('top-transition')
+        this.props.transitions && classes.push('dnd-list__transition')
 
         if (inRange(currentIx, draggedIx, draggedIx + this.state.step)) {
           offset = this.state.step < 0
@@ -91,8 +93,8 @@ class List extends React.Component {
 
       if (inDrag) {
         offset = this.state.offset
-        classes.push('in-drag')
-        this.state.drop && classes.push('top-transition')
+        classes.push('dnd-list__in-drag')
+        this.state.drop && classes.push('dnd-list__transition')
       }
 
       return <this.ControlledItem

@@ -1,5 +1,5 @@
-import React, { Fragment, Component } from 'react';
-import './dnd-list/styles.css';
+import React from 'react';
+import './App.css'
 
 import DnDList from './dnd-list/dnd-list';
 
@@ -19,7 +19,7 @@ const ListItem = (props) => {
   )
 }
 
-class App extends Component {
+class App extends React.Component {
   render() {
     return (
       <ul>

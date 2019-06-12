@@ -1,0 +1,50 @@
+html {
+  height: 100%;
+}
+
+body {
+  background: #000;
+  color: #fff;
+  height: 110%;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 20px;
+  border: 1px solid #333;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #111;
+
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  ser-select: none;
+}
+
+li {
+  border-bottom: 1px solid #333;
+  border-top: 1px solid #333;
+  background: #000;
+
+  display: flex;
+  align-items: center;
+}
+
+li:last-child {
+  border-bottom: none;
+}
+
+.mover {
+  display: inline-block;
+  padding: 20px 25px;
+  margin-right: 10px;
+}
+
+.mover:hover {
+  background: #111;
+  cursor: pointer;
+}
