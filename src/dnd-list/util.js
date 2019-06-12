@@ -3,7 +3,11 @@ export const inRange = (n, min, max) => {
   return n >= min && n <= max
 }
 
-export const shiftArray = (array, index, step) => {
-  const toShift = array.splice(index, 1)[0]
-  array.splice(index + step, 0, toShift)
+export const arrayShift = (array, index, step) => {
+  const newArray = [...array]
+
+  const toShift = newArray.splice(index, 1)[0]
+  newArray.splice(index + step, 0, toShift)
+
+  return newArray
 }

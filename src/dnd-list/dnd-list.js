@@ -1,5 +1,5 @@
 import React, { Fragment, useRef } from 'react'
-import { inRange, shiftArray } from './util'
+import { inRange, arrayShift } from './util'
 
 import './styles.css'
 
@@ -69,7 +69,10 @@ class List extends React.Component {
 
   handleDropEnd = () => {
     this.state.ref.removeEventListener('transitionend', this.handleDropEnd)
-    shiftArray(this.props.items, this.state.index, this.state.step)
+
+    const newList = arrayShift(this.props.items, this.state.index, this.state.step)
+    this.props.setList(newList)
+
     this.setState(initState)
   }
 
