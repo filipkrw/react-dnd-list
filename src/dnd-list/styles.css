@@ -26,27 +26,20 @@ ul {
 }
 
 li {
-  padding: 20px;
   border-bottom: 1px solid #333;
   border-top: 1px solid #333;
   background: #000;
+
+  display: flex;
+  align-items: center;
 }
 
 li:last-child {
   border-bottom: none;
 }
 
-li:hover {
-  background: #111;
-  cursor: pointer;
-}
-
 .top-transition {
   transition: top .2s;
-}
-
-.no-top-transition {
-  transition: top 0s;
 }
 
 .draggable {
@@ -58,4 +51,15 @@ li:hover {
 .in-drag {
   background: #111 !important;
   z-index: 101;
+}
+
+.mover {
+  display: inline-block;
+  padding: 20px 25px;
+  margin-right: 10px;
+}
+
+.mover:hover {
+  background: #111;
+  cursor: pointer;
 }
