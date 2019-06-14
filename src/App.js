@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
 import './App.css'
 
-import DnDList from './dnd-list/dnd-list';
+import DnDList from './dnd-list/List';
 
 const ListItem = (props) => {
+  const style = props.value === '3'
+    ? { height: '100px '}
+    : {}
+
   return (
     <li
-      style={props.style}
+      style={{ ...props.style, ...style }}
       className={props.className}
       ref={props.domRef}
     >
