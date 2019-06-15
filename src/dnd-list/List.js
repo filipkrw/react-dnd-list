@@ -13,8 +13,12 @@ const idleState = {
   // Dragged element controll
   index: -1,
   offset: 0,
+  minOffset: 0,
+  maxOffset: 0,
   origin: 0,
-  newOriginOffset: 0
+  newOriginOffset: 0,
+
+  lastSwapped: -1
 }
 
 class List extends React.Component {
@@ -23,8 +27,7 @@ class List extends React.Component {
     this.state = idleState
 
     this.itemRefs = []
-    this.itemHeights = []
-
+    this.itemRects = []
     this.neighbors = {}
 
     this.Item = createControlledItem(this.props.itemComponent)
@@ -34,13 +37,13 @@ class List extends React.Component {
   }
 
   componentDidMount() {
-    this.getitemHeights()
+    this.getitemRects()
   }
 
   componentDidUpdate(prevProps, prevState) {
     // after handleDropEnd()
     if (prevState.drag && !this.state.drag) {
-      this.getitemHeights()
+      this.getitemRects()
     }
   }
 
@@ -48,22 +51,24 @@ class List extends React.Component {
     this.itemRefs.push(ref)
   }
 
-  getitemHeights = () => {
-    this.itemHeights = this.itemRefs.map(ref => {
-      return ref.getBoundingClientRect().height
+  getitemRects = () => {
+    this.itemRects = this.itemRefs.map(ref => {
+      return ref.getBoundingClientRect()
     })
   }
 
-  updateStep = (newStep, index = this.state.index) => {
+  updateStep = (newStep) => {
+    const lastSwapped = newStep > this.state.step ? this.neighbors.next : this.neighbors.prev
+
     if (newStep === 0) {
-      this.neighbors = { prev: index - 1, next: index + 1 }
+      this.neighbors = { prev: this.state.index - 1, next: this.state.index + 1 }
     } else if (newStep > this.state.step) {
       this.neighbors = { prev: this.neighbors.next, next: this.neighbors.next + 1 }
     } else {
       this.neighbors = { prev: this.neighbors.prev - 1, next: this.neighbors.prev }
     }
 
-    this.setState({ step: newStep })
+    this.setState({ step: newStep, lastSwapped })
   }
 
   handleDragStart = (index, origin) => {
@@ -74,29 +79,40 @@ class List extends React.Component {
     window.addEventListener('scroll', this.handleDrop)
 
     this.neighbors = { prev: index - 1, next: index + 1 }
-    this.setState({ index, origin, drag: true })
+
+    const dims = this.itemRects
+
+    this.setState({
+      index, origin,
+      drag: true,
+      minOffset: dims[0].top - dims[index].top,
+      maxOffset: dims[this.props.items.length - 1].bottom - dims[index].bottom
+    })
   }
 
   handleDrag = (event) => {
-    const { step, newOriginOffset } = this.state
-    const offset = event.clientY - this.state.origin
+    const offset = Math.max(
+      this.state.minOffset,
+      Math.min(this.state.maxOffset, event.clientY - this.state.origin)
+    )
 
-    const prevHeight = this.itemHeights[this.neighbors.prev]
-    const nextHeight = this.itemHeights[this.neighbors.next]
+    const prev = this.itemRects[this.neighbors.prev]
+    const next = this.itemRects[this.neighbors.next]
 
     if (
       this.neighbors.next < this.props.items.length &&
-      offset - newOriginOffset > nextHeight
+      offset - this.state.newOriginOffset >= next.height
     ) {
-      this.setState({ newOriginOffset: this.state.newOriginOffset + nextHeight })
-      this.updateStep(step + 1)
+      this.setState({ newOriginOffset: this.state.newOriginOffset + next.height })
+      this.updateStep(this.state.step + 1)
     }
 
     else if (
-      this.neighbors.prev > -1 && offset - newOriginOffset < -prevHeight
+      this.neighbors.prev > -1 &&
+      offset - this.state.newOriginOffset <= -prev.height
     ) {
-      this.setState({ newOriginOffset: this.state.newOriginOffset - prevHeight })
-      this.updateStep(step - 1)
+      this.setState({ newOriginOffset: this.state.newOriginOffset - prev.height })
+      this.updateStep(this.state.step - 1)
     }
 
     this.setState({ offset })
@@ -110,10 +126,15 @@ class List extends React.Component {
     if (this.props.transitions) {
       this.itemRefs[this.state.index].addEventListener('transitionend', this.handleDropEnd)
 
-      this.setState({
-        drop: true,
-        offset: this.state.newOriginOffset
-      })
+      // Add arbitrary small value to new offset, because animation won't play
+      // if offset and newOriginOffset have exact same values when element is dropped
+      // (will happen when dragged element is dropped precisely where it will end up
+      // after drop), resulting in handleDropEnd() not being called.
+      const newOffset = this.state.offset === this.state.newOriginOffset
+        ? this.state.newOriginOffset + .00001
+        : this.state.newOriginOffset
+
+      this.setState({ drop: true, offset: newOffset })
     } else {
       this.handleDropEnd()
     }
@@ -131,29 +152,25 @@ class List extends React.Component {
   render() {
     const items = this.props.items.map((value, currentIx) => {
       const draggedIx = this.state.index
-      const inDrag = draggedIx === currentIx
+      const currentInDrag = currentIx === draggedIx
 
       let classes = ['dnd-list__draggable']
       let styles = {}
 
-      if (this.state.drag && !inDrag) {
-        if (this.props.transitions) {
-          classes.push(this.transitionClass)
-        }
+      if (this.state.drag && !currentInDrag) {
+        if (this.props.transitions) { classes.push(this.transitionClass) }
 
         if (inRange(currentIx, draggedIx, draggedIx + this.state.step)) {
           styles.top = this.state.step < 0
-            ? this.itemHeights[draggedIx]
-            : -this.itemHeights[draggedIx]
+            ? this.itemRects[draggedIx].height
+            : -this.itemRects[draggedIx].height
         }
       }
 
-      if (inDrag) {
+      if (currentInDrag) {
         styles.top = this.state.offset
         classes.push('dnd-list__in-drag')
-        if (this.state.drop) {
-          classes.push(this.transitionClass)
-        }
+        if (this.state.drop) { classes.push(this.transitionClass)}
       }
 
       return <this.Item
@@ -166,7 +183,7 @@ class List extends React.Component {
         saveRef={this.saveRef}
         handleDragStart={this.handleDragStart.bind(this, currentIx)}
 
-        inDrag={inDrag}
+        inDrag={currentInDrag}
       />
     })
 
