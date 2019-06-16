@@ -1,0 +1,40 @@
+{
+  "name": "react-dnd-list",
+  "version": "1.0.0",
+  "description": "React drag and drop list",
+  "main": "./build/index.js",
+  "peerDependencies": {
+    "react": "^16.8.6"
+  },
+  "scripts": {
+    "start": "webpack --watch",
+    "build": "webpack",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "react",
+    "drag and drop",
+    "swap",
+    "list"
+  ],
+  "author": "Filip Krawczyk",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/atom-heart/react-dnd-list"
+  },
+  "dependencies": {
+    "react": "^16.8.6",
+    "webpack": "^4.34.0"
+  },
+  "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-loader": "^7.1.5",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-preset-react": "^6.24.1",
+    "css-loader": "^3.0.0",
+    "style-loader": "^0.23.1",
+    "webpack-cli": "^3.3.4"
+  }
+}

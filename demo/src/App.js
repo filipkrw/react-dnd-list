@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState } from 'react'
 import './App.css'
 
-import DnDList from './dnd-list/List';
+import DnDList from 'react-dnd-list'
 
 const ListItem = (props) => {
   const style = props.value === '3'
