@@ -16,6 +16,7 @@ ul {
   border-radius: 4px;
   overflow: hidden;
   background: #111;
+  /* display: flex; */
 
   -webkit-touch-callout: none;
   -webkit-user-select: none;

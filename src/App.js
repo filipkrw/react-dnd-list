@@ -33,6 +33,7 @@ const App = () => {
         itemComponent={ListItem}
         setList={setList}
         allowTransitions
+        transitionClass={'test'}
       />
     </ul>
   )

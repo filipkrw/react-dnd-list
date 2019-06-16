@@ -12,7 +12,7 @@ export const createControlledItem = (Item) => {
     }
 
     handleDragStart = (event) => {
-      this.props.handleDragStart(event.clientY)
+      this.props.handleDragStart(event[this.props.mousePos])
     }
 
     render() {
