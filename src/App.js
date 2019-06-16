@@ -33,7 +33,8 @@ const App = () => {
         itemComponent={ListItem}
         setList={setList}
         allowTransitions
-        transitionStyles={{ transitionDuration: '.1s' }}
+        swapThreshold={(size) => size * .7}
+        overflowThreshold={(size) => size * .2}
       />
     </ul>
   )
