@@ -33,7 +33,7 @@ const App = () => {
         itemComponent={ListItem}
         setList={setList}
         allowTransitions
-        transitionClass={'test'}
+        transitionStyles={{ transitionDuration: '.1s' }}
       />
     </ul>
   )

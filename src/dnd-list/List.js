@@ -23,12 +23,12 @@ class List extends React.Component {
     this.state = initState
 
     this.itemComponent = createControlledItem(this.props.itemComponent)
-    this.keywords = this.props.horizontal
+    this.options = this.props.horizontal
       ? { start: 'left', end: 'right', dist: 'width', mousePos: 'clientX' }
       : { start: 'top', end: 'bottom', dist: 'height', mousePos: 'clientY' }
-    this.transitionClasses = this.props.transitionClass
-      ? 'dnd-list__transition ' + this.props.transitionClass
-      : 'dnd-list__transition'
+    this.transitionStyles = this.props.transitionStyles
+      ? this.props.transitionStyles
+      : {}
 
     this.itemRefs = []
     this.itemRects = []
@@ -78,7 +78,7 @@ class List extends React.Component {
     this.setState({ index, origin, drag: true })
     this.neighbors = { prev: index - 1, next: index + 1 }
 
-    const { start, end } = this.keywords
+    const { start, end } = this.options
     const rects = this.itemRects
 
     this.offsetLimits = {
@@ -89,7 +89,7 @@ class List extends React.Component {
 
   handleDrag = (event) => {
     const offset = clamp(
-      event[this.keywords.mousePos] - this.state.origin,
+      event[this.options.mousePos] - this.state.origin,
       this.offsetLimits.min,
       this.offsetLimits.max
     )
@@ -99,12 +99,12 @@ class List extends React.Component {
 
     if (
       this.neighbors.next < this.props.items.length &&
-      offset - this.state.newOriginOffset >= next[this.keywords.dist]
+      offset - this.state.newOriginOffset >= next[this.options.dist]
     ) { this.swap(this.state.step + 1) }
 
     else if (
       this.neighbors.prev > -1 &&
-      offset - this.state.newOriginOffset <= -prev[this.keywords.dist]
+      offset - this.state.newOriginOffset <= -prev[this.options.dist]
     ) { this.swap(this.state.step - 1) }
 
     if (offset !== this.state.offset) {
@@ -114,7 +114,7 @@ class List extends React.Component {
 
   swap = (newStep) => {
     const { prev, next } = this.neighbors
-    const { dist } = this.keywords
+    const { dist } = this.options
 
     let swapped = {}
 
@@ -180,21 +180,28 @@ class List extends React.Component {
       const currentInDrag = currentIx === draggedIx
 
       let classes = ['dnd-list__draggable']
-      let offset = 0
+      let styles = { [this.options.start]: 0 }
 
       if (currentInDrag) {
-        offset = this.state.offset
         classes.push('dnd-list__in-drag')
-        if (this.state.drop) { classes.push(this.transitionClasses) }
+        styles[this.options.start] = this.state.offset
+
+        if (this.state.drop) {
+          classes.push('dnd-list__transition')
+          styles = { ...styles, ...this.transitionStyles }
+        }
       }
 
       else if (this.state.drag && !currentInDrag) {
-        if (this.props.allowTransitions) { classes.push(this.transitionClasses) }
+        if (this.props.allowTransitions) {
+          classes.push('dnd-list__transition')
+          styles = { ...styles, ...this.transitionStyles }
+        }
 
         if (inRange(currentIx, draggedIx, draggedIx + this.state.step)) {
-          offset = this.state.step < 0
-            ? this.itemRects[draggedIx][this.keywords.dist]
-            : -this.itemRects[draggedIx][this.keywords.dist]
+          styles[this.options.start] = this.state.step < 0
+            ? this.itemRects[draggedIx][this.options.dist]
+            : -this.itemRects[draggedIx][this.options.dist]
         }
       }
 
@@ -202,14 +209,14 @@ class List extends React.Component {
         key={currentIx}
         value={value}
 
-        style={{ [this.keywords.start]: offset }}
+        style={styles}
         className={classes.join(' ')}
 
         saveRef={this.saveRef}
         handleDragStart={this.handleDragStart.bind(this, currentIx)}
 
         inDrag={currentInDrag}
-        mousePos={this.keywords.mousePos}
+        mousePos={this.options.mousePos}
       />
     })
 
