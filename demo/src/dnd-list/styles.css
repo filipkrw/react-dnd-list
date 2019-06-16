@@ -1,0 +1,13 @@
+.dnd-list__draggable {
+  position: relative;
+  top: 0;
+  z-index: 100;
+}
+
+.dnd-list__in-drag {
+  z-index: 101;
+}
+
+.dnd-list__transition {
+  transition: top .3s, left .3s;
+}
