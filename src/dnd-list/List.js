@@ -81,7 +81,13 @@ class List extends React.Component {
     if (this.state.drag) { return }
 
     window.addEventListener('mousemove', this.handleDrag)
+    window.addEventListener('touchmove', this.handleDrag)
+
     window.addEventListener('mouseup', this.handleDrop)
+    window.addEventListener('touchend', this.handleDrop)
+    window.addEventListener('touchcancel', this.handleDrop)
+    window.addEventListener('pointerup', this.handleDrop)
+
     window.addEventListener('scroll', this.handleDrop)
 
     this.setState({ index, origin, drag: true })
@@ -156,8 +162,15 @@ class List extends React.Component {
 
   handleDrop = () => {
     window.removeEventListener('mousemove', this.handleDrag)
+    window.removeEventListener('touchmove', this.handleDrag)
+
     window.removeEventListener('mouseup', this.handleDrop)
+    window.removeEventListener('touchend', this.handleDrop)
+    window.removeEventListener('touchcancel', this.handleDrop)
+    window.removeEventListener('pointerup', this.handleDrop)
+
     window.removeEventListener('scroll', this.handleDrop)
+
 
     if (this.props.allowTransitions) {
       if (this.state.offset !== this.state.newOriginOffset) {

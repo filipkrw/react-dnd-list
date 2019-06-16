@@ -20,7 +20,11 @@ export const createControlledItem = (Item) => {
         <Item
           {...this.props}
           domRef={this.ref}
-          handleDrag={this.handleDragStart}
+          dragHandlers={{
+            onMouseDown: this.handleDragStart,
+            onTouchStart: this.handleDragStart,
+            onPointerDown: this.handleDragStart
+          }}
         />
       )
     }

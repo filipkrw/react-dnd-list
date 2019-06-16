@@ -16,7 +16,7 @@ const ListItem = (props) => {
     >
       <div
         className="mover"
-        onMouseDown={props.handleDrag}
+        {...props.dragHandlers}
       >=</div>
       <span>{props.value}</span>
     </li>
@@ -33,7 +33,7 @@ const App = () => {
         itemComponent={ListItem}
         setList={setList}
         allowTransitions
-        swapThreshold={(size) => size * .7}
+        swapThreshold={(size) => size * .75}
         overflowThreshold={(size) => size * .2}
       />
     </ul>
