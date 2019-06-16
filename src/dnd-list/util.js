@@ -11,3 +11,7 @@ export const arrayShift = (array, index, step) => {
 
   return newArray
 }
+
+export const clamp = (val, min, max) => {
+  return val > min ? (val < max ? val : max) : min
+}

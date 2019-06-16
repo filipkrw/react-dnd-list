@@ -1,10 +1,10 @@
 import React, { Fragment } from 'react'
 import { createControlledItem } from './Item'
-import { inRange, arrayShift } from './util'
+import { inRange, arrayShift, clamp } from './util'
 
 import './styles.css'
 
-const idleState = {
+const initState = {
   // List controll
   drag: false,
   drop: false,
@@ -14,38 +14,35 @@ const idleState = {
   index: -1,
   origin: 0,
   offset: 0,
-  minOffset: 0,
-  maxOffset: 0,
   newOriginOffset: 0
 }
 
 class List extends React.Component {
   constructor(props) {
     super(props)
-    this.state = idleState
-
-    this.itemRefs = []
-    this.itemRects = []
-    this.neighbors = {}
-    this.inTransition = {}
-
-    this.counter = 0
+    this.state = initState
 
     this.Item = createControlledItem(this.props.itemComponent)
     this.transitionClass = this.props.transitionClass
       ? this.props.transitionClass
       : 'dnd-list__transition'
+
+    this.itemRefs = []
+    this.itemRects = []
+    this.inTransition = {}
+    this.neighbors = {}
+    this.offsetLimits = {}
   }
 
   componentDidMount() {
-    if (this.props.transitions) {
+    if (this.props.allowTransitions) {
       this.attachTransitionListeners()
     }
     this.getitemRects()
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (prevState.drag && !this.state.drag) {
+    if (prevState.drag && !this.state.drag) { // after handleDropEnd()
       this.getitemRects()
     }
   }
@@ -68,50 +65,6 @@ class List extends React.Component {
     })
   }
 
-  swap = (newStep) => {
-    let swapped = {}
-
-    if (newStep > this.state.step) {
-      swapped = {
-        index: this.neighbors.next,
-        height: this.itemRects[this.neighbors.next].height
-      }
-      this.neighbors = {
-        prev: this.neighbors.next,
-        next: this.neighbors.next + 1
-      }
-    } else {
-      swapped = {
-        index: this.neighbors.prev,
-        height: -this.itemRects[this.neighbors.prev].height // negative value
-      }
-      this.neighbors = {
-        prev: this.neighbors.prev - 1,
-        next: this.neighbors.prev
-      }
-    }
-
-    if (newStep === 0) {
-      this.neighbors = {
-        prev: this.state.index - 1,
-        next: this.state.index + 1
-      }
-    }
-
-    if (this.props.transitions) {
-      this.inTransition = {
-        ...this.inTransition,
-        [swapped.index]: true,
-        last: swapped.index
-      }
-    }
-
-    this.setState({
-      step: newStep,
-      newOriginOffset: this.state.newOriginOffset + swapped.height
-    })
-  }
-
   handleDragStart = (index, origin) => {
     if (this.state.drag) { return }
 
@@ -119,25 +72,20 @@ class List extends React.Component {
     window.addEventListener('mouseup', this.handleDrop)
     window.addEventListener('scroll', this.handleDrop)
 
-    this.neighbors = {
-      prev: index - 1,
-      next: index + 1
+    this.setState({ index, origin, drag: true })
+    this.neighbors = { prev: index - 1, next: index + 1 }
+
+    this.offsetLimits = {
+      min: this.itemRects[0].top - this.itemRects[index].top,
+      max: this.itemRects[this.props.items.length - 1].bottom - this.itemRects[index].bottom
     }
-
-    const rects = this.itemRects
-
-    this.setState({
-      index, origin,
-      drag: true,
-      minOffset: rects[0].top - rects[index].top,
-      maxOffset: rects[this.props.items.length - 1].bottom - rects[index].bottom
-    })
   }
 
   handleDrag = (event) => {
-    const offset = Math.max(
-      this.state.minOffset,
-      Math.min(this.state.maxOffset, event.clientY - this.state.origin)
+    const offset = clamp(
+      event.clientY - this.state.origin,
+      this.offsetLimits.min,
+      this.offsetLimits.max
     )
 
     const prev = this.itemRects[this.neighbors.prev]
@@ -146,20 +94,43 @@ class List extends React.Component {
     if (
       this.neighbors.next < this.props.items.length &&
       offset - this.state.newOriginOffset >= next.height
-    ) {
-      this.swap(this.state.step + 1)
-    }
+    ) { this.swap(this.state.step + 1) }
 
     else if (
       this.neighbors.prev > -1 &&
       offset - this.state.newOriginOffset <= -prev.height
-    ) {
-      this.swap(this.state.step - 1)
-    }
+    ) { this.swap(this.state.step - 1) }
 
     if (offset !== this.state.offset) {
       this.setState({ offset })
     }
+  }
+
+  swap = (newStep) => {
+    const { prev, next } = this.neighbors
+    let swapped = {}
+
+    if (newStep > this.state.step) {
+      this.neighbors = { prev: next, next: next + 1 }
+      swapped = { index: next, height: this.itemRects[next].height }
+    } else {
+      this.neighbors = { prev: prev - 1, next: prev }
+      swapped = { index: prev, height: -this.itemRects[prev].height } // Negative height
+    }
+
+    if (newStep === 0) {
+      this.neighbors = { prev: this.state.index - 1, next: this.state.index + 1 }
+    }
+
+    if (this.props.allowTransitions) {
+      this.inTransition[swapped.index] = true
+      this.inTransition.last = swapped.index
+    }
+
+    this.setState({
+      step: newStep,
+      newOriginOffset: this.state.newOriginOffset + swapped.height
+    })
   }
 
   handleDrop = () => {
@@ -167,22 +138,18 @@ class List extends React.Component {
     window.removeEventListener('mouseup', this.handleDrop)
     window.removeEventListener('scroll', this.handleDrop)
 
-    if (this.props.transitions) {
-      if (this.state.offset === this.state.newOriginOffset) {
-        const lastInTransition = this.inTransition[this.inTransition.last]
-        
-        if (lastInTransition) {
-          this.itemRefs[this.inTransition.last].addEventListener('transitionend', this.handleDropEnd)
-        } else {
-          this.handleDropEnd()
-        }
-      } else {
+    if (this.props.allowTransitions) {
+      if (this.state.offset !== this.state.newOriginOffset) {
         this.itemRefs[this.state.index].addEventListener('transitionend', this.handleDropEnd)
         this.setState({ drop: true, offset: this.state.newOriginOffset })
+        return
+      } else if (this.inTransition[this.inTransition.last]) {
+        this.itemRefs[this.inTransition.last].addEventListener('transitionend', this.handleDropEnd)
+        return
       }
-    } else {
-      this.handleDropEnd()
     }
+
+    this.handleDropEnd()
   }
 
   handleDropEnd = () => {
@@ -195,7 +162,7 @@ class List extends React.Component {
     const newList = arrayShift(this.props.items, this.state.index, this.state.step)
     this.props.setList(newList)
 
-    this.setState(idleState)
+    this.setState(initState)
     this.inTransition = {}
   }
 
@@ -205,29 +172,29 @@ class List extends React.Component {
       const currentInDrag = currentIx === draggedIx
 
       let classes = ['dnd-list__draggable']
-      let styles = {}
+      let offset = 0
 
-      if (this.state.drag && !currentInDrag) {
-        if (this.props.transitions) { classes.push(this.transitionClass) }
+      if (currentInDrag) {
+        offset = this.state.offset
+        classes.push('dnd-list__in-drag')
+        if (this.state.drop) { classes.push(this.transitionClass) }
+      }
+
+      else if (this.state.drag && !currentInDrag) {
+        if (this.props.allowTransitions) { classes.push(this.transitionClass) }
 
         if (inRange(currentIx, draggedIx, draggedIx + this.state.step)) {
-          styles.top = this.state.step < 0
+          offset = this.state.step < 0
             ? this.itemRects[draggedIx].height
             : -this.itemRects[draggedIx].height
         }
-      }
-
-      if (currentInDrag) {
-        styles.top = this.state.offset
-        classes.push('dnd-list__in-drag')
-        if (this.state.drop) { classes.push(this.transitionClass)}
       }
 
       return <this.Item
         key={currentIx}
         value={value}
 
-        style={styles}
+        style={{ top: offset }}
         className={classes.join(' ')}
 
         saveRef={this.saveRef}

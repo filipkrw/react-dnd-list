@@ -32,7 +32,7 @@ const App = () => {
         items={list}
         itemComponent={ListItem}
         setList={setList}
-        transitions
+        allowTransitions
       />
     </ul>
   )
