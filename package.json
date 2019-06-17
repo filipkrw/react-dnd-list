@@ -11,6 +11,10 @@
     "build": "webpack --mode production",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/atom-heart/react-dnd-list.git"
+  },
   "keywords": [
     "react",
     "drag and drop",
@@ -19,13 +23,12 @@
   ],
   "author": "Filip Krawczyk",
   "license": "ISC",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/atom-heart/react-dnd-list"
+  "bugs": {
+    "url": "https://github.com/atom-heart/react-dnd-list/issues"
   },
+  "homepage": "https://github.com/atom-heart/react-dnd-list#readme",
   "dependencies": {
-    "react": "^16.8.6",
-    "webpack": "^4.34.0"
+    "react": "^16.8.6"
   },
   "devDependencies": {
     "babel-core": "^6.26.3",
@@ -35,6 +38,7 @@
     "babel-preset-react": "^6.24.1",
     "css-loader": "^3.0.0",
     "style-loader": "^0.23.1",
+    "webpack": "^4.34.0",
     "webpack-cli": "^3.3.4"
   }
 }
