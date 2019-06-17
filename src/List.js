@@ -174,20 +174,29 @@ class List extends React.Component {
 
     if (this.props.allowTransitions) {
       if (this.state.offset !== this.state.newOriginOffset) {
-        this.itemRefs[this.state.index].addEventListener('transitionend', this.handleDropEnd)
+        this.itemRefs[this.state.index].addEventListener('transitionend', this.handleDropTransition)
         this.setState({ drop: true, offset: this.state.newOriginOffset })
         return
       } else if (this.inTransition[this.inTransition.last]) {
-        this.itemRefs[this.inTransition.last].addEventListener('transitionend', this.handleDropEnd)
+        this.itemRefs[this.inTransition.last].addEventListener('transitionend', this.handleDropTransition)
         return
       }
     }
-
     this.handleDropEnd()
+  }
+
+  handleDropTransition = (element) => {
+    if (
+      element.propertyName === this.keywords.start &&
+      element.target.className.includes('dnd-list__draggable')
+    ) {
+      this.handleDropEnd()
+    }
   }
 
   handleDropEnd = () => {
     this.itemRefs[this.state.index].removeEventListener('transitionend', this.handleDropEnd)
+    this.itemRefs[this.state.index].removeEventListener('transitionend', this.handleDropTransition)
 
     if (typeof(this.inTransition.last) !== 'undefined') {
       this.itemRefs[this.inTransition.last].removeEventListener('transitionend', this.handleDropEnd)
@@ -233,7 +242,7 @@ class List extends React.Component {
 
       return <this.itemComponent
         key={currentIx}
-        value={value}
+        item={value}
 
         style={styles}
         className={classes.join(' ')}
