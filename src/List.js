@@ -4,6 +4,12 @@ import { inRange, arrayShift, clamp } from './util'
 
 import './styles.css'
 
+const CLASS = {
+  DRAGGABLE: 'dnd-list__draggable',
+  IN_DRAG: 'dnd-list__in-drag',
+  TRANSITION: 'dnd-list__transition'
+}
+
 const initState = {
   // List controll
   drag: false,
@@ -188,7 +194,7 @@ class List extends React.Component {
   handleDropTransition = (element) => {
     if (
       element.propertyName === this.keywords.start &&
-      element.target.className.includes('dnd-list__draggable')
+      element.target.className.includes(CLASS.DRAGGABLE)
     ) {
       this.handleDropEnd()
     }
@@ -214,22 +220,22 @@ class List extends React.Component {
       const draggedIx = this.state.index
       const currentInDrag = currentIx === draggedIx
 
-      let classes = ['dnd-list__draggable']
+      let classes = [CLASS.DRAGGABLE]
       let styles = { [this.keywords.start]: 0 }
 
       if (currentInDrag) {
-        classes.push('dnd-list__in-drag')
+        classes.push(CLASS.IN_DRAG)
         styles[this.keywords.start] = this.state.offset
 
         if (this.state.drop) {
-          classes.push('dnd-list__transition')
+          classes.push(CLASS.TRANSITION)
           styles = { ...styles, ...this.transitionStyles }
         }
       }
 
       else if (this.state.drag && !currentInDrag) {
         if (this.props.allowTransitions) {
-          classes.push('dnd-list__transition')
+          classes.push(CLASS.TRANSITION)
           styles = { ...styles, ...this.transitionStyles }
         }
 
