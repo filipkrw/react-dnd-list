@@ -1,16 +1,12 @@
 import React, { useState } from 'react'
 import './App.css'
 
-import DnDList from 'react-dnd-list'
+import List from 'react-dnd-list'
 
-const ListItem = (props) => {
-  const style = props.value === '3'
-    ? { height: '100px '}
-    : {}
-
+const Item = (props) => {
   return (
     <li
-      style={{ ...props.style, ...style }}
+      style={props.style}
       className={props.className}
       ref={props.domRef}
     >
@@ -28,9 +24,9 @@ const App = () => {
 
   return (
     <ul>
-      <DnDList
+      <List
         items={list}
-        itemComponent={ListItem}
+        itemComponent={Item}
         setList={setList}
         allowTransitions
         swapThreshold={(size) => size * .75}
@@ -40,4 +36,4 @@ const App = () => {
   )
 }
 
-export default App;
+export default App
