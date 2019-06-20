@@ -59,7 +59,7 @@ class List extends React.Component {
   handleDragStart = (index, origin) => {
     if (this.state.drag) { return }
 
-    this.addDnDEventListeners()
+    this.setDnDEventListeners(window.addEventListener)
 
     this.setState({
       index, origin,
@@ -97,7 +97,6 @@ class List extends React.Component {
   swap = (newStep) => {
     const { prev, next } = this.state.nearbyItems
     const { size } = this.keywords
-
     let swapped = {}
 
     if (newStep > this.state.step) {
@@ -119,7 +118,7 @@ class List extends React.Component {
   }
 
   handleDrop = () => {
-    this.removeDnDEventListeners()
+    this.setDnDEventListeners(window.removeEventListener)
 
     if (this.props.allowTransitions && this.state.offset !== this.state.newOriginOffset) {
       this.itemRefs[this.itemPos[this.state.index]].addEventListener('transitionend', this.handleDropTransition)
@@ -148,9 +147,10 @@ class List extends React.Component {
     this.props.setList(arrayShift(this.props.items, index, step))
 
     this.setState({ ...initState, index: index + step })
-
     // Final stage of drop happens in componentDidUpdate
   }
+
+  // Render --------------------------------------------------------------------
 
   render() {
     const items = this.props.items.map((value, currentIx) => {
@@ -244,28 +244,16 @@ class List extends React.Component {
     }
   }
 
-  addDnDEventListeners = () => {
-    window.addEventListener('mousemove', this.handleDrag)
-    window.addEventListener('touchmove', this.handleDrag)
+  setDnDEventListeners = (listenerFunction) => {
+    listenerFunction('mousemove', this.handleDrag)
+    listenerFunction('touchmove', this.handleDrag)
 
-    window.addEventListener('mouseup', this.handleDrop)
-    window.addEventListener('touchend', this.handleDrop)
-    window.addEventListener('touchcancel', this.handleDrop)
-    window.addEventListener('pointerup', this.handleDrop)
+    listenerFunction('mouseup', this.handleDrop)
+    listenerFunction('touchend', this.handleDrop)
+    listenerFunction('touchcancel', this.handleDrop)
+    listenerFunction('pointerup', this.handleDrop)
 
-    window.addEventListener('scroll', this.handleDrop)
-  }
-
-  removeDnDEventListeners = () => {
-    window.removeEventListener('mousemove', this.handleDrag)
-    window.removeEventListener('touchmove', this.handleDrag)
-
-    window.removeEventListener('mouseup', this.handleDrop)
-    window.removeEventListener('touchend', this.handleDrop)
-    window.removeEventListener('touchcancel', this.handleDrop)
-    window.removeEventListener('pointerup', this.handleDrop)
-
-    window.removeEventListener('scroll', this.handleDrop)
+    listenerFunction('scroll', this.handleDrop)
   }
 }
 
