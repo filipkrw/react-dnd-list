@@ -4,7 +4,7 @@ import { inRange, arrayShift, clamp } from './util'
 
 import './styles.css'
 
-const CLASS = {
+const CLASSES = {
   DRAGGABLE: 'dnd-list__draggable',
   IN_DRAG: 'dnd-list__in-drag',
   TRANSITION: 'dnd-list__transition'
@@ -15,12 +15,14 @@ const initState = {
   drag: false,
   drop: false,
   step: 0,
+  nearbyItems: {},
 
   // Dragged element controll
-  index: -1,
+  index: null,
   origin: 0,
   offset: 0,
-  newOriginOffset: 0
+  newOriginOffset: 0,
+  offsetLimits: {}
 }
 
 class List extends React.Component {
@@ -37,37 +39,177 @@ class List extends React.Component {
       : {}
 
     this.itemRefs = []
-    this.itemRects = []
-    this.inTransition = {}
-    this.neighbors = {}
-    this.offsetLimits = {}
-
-    this.positions = this.props.items.map((item, index) => index)
+    this.itemDims = []
+    this.itemPos = this.props.items.map((item, index) => index)
   }
 
   componentDidMount() {
-    if (this.props.allowTransitions) {
-      this.attachTransitionListeners()
-    }
-    this.getItemRects()
+    this.getItemDims()
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (prevState.drag && !this.state.drag) { // after handleDropEnd()
-      this.getItemRects()
-    }
-    if (this.state.reload) {
-      this.setState({ ...initState, reload: false })
+    if (prevState.drag && !this.state.drag) { // after handleDropEnd
+      this.getItemDims()
+      this.setState(initState)
     }
   }
 
-  saveRef = (ref) => {
+  // Drag and drop functionality -----------------------------------------------
+
+  handleDragStart = (index, origin) => {
+    if (this.state.drag) { return }
+
+    this.addDnDEventListeners()
+
+    this.setState({
+      index, origin,
+      drag: true,
+      nearbyItems: { prev: index - 1, next: index + 1 },
+      offsetLimits: this.getOffsetLimits(index)
+    })
+  }
+
+  handleDrag = (event) => {
+    const offset = this.getOffset(event[this.keywords.mousePos])
+
+    const prev = this.itemDims[this.state.nearbyItems.prev]
+    const next = this.itemDims[this.state.nearbyItems.next]
+
+    if (
+      this.state.nearbyItems.next < this.props.items.length &&
+      offset - this.state.newOriginOffset >= next.threshold
+    ) {
+      this.swap(this.state.step + 1)
+    }
+
+    else if (
+      this.state.nearbyItems.prev > -1 &&
+      offset - this.state.newOriginOffset <= -prev.threshold
+    ) {
+      this.swap(this.state.step - 1)
+    }
+
+    if (offset !== this.state.offset) {
+      this.setState({ offset })
+    }
+  }
+
+  swap = (newStep) => {
+    const { prev, next } = this.state.nearbyItems
+    const { size } = this.keywords
+
+    let swapped = {}
+
+    if (newStep > this.state.step) {
+      this.state.nearbyItems = { prev: next, next: next + 1 }
+      swapped = { index: next, [size]: this.itemDims[next][size] }
+    } else {
+      this.state.nearbyItems = { prev: prev - 1, next: prev }
+      swapped = { index: prev, [size]: -this.itemDims[prev][size] } // Negative size
+    }
+
+    if (newStep === 0) {
+      this.state.nearbyItems = { prev: this.state.index - 1, next: this.state.index + 1 }
+    }
+
+    this.setState({
+      step: newStep,
+      newOriginOffset: this.state.newOriginOffset + swapped[size]
+    })
+  }
+
+  handleDrop = () => {
+    this.removeDnDEventListeners()
+
+    if (this.props.allowTransitions && this.state.offset !== this.state.newOriginOffset) {
+      this.itemRefs[this.itemPos[this.state.index]].addEventListener('transitionend', this.handleDropTransition)
+      this.setState({ drop: true, offset: this.state.newOriginOffset })
+    } else {
+      this.handleDropEnd()
+    }
+  }
+
+  handleDropTransition = (element) => {
+    if (
+      element.propertyName === this.keywords.start &&
+      element.target.className.includes(CLASSES.DRAGGABLE)
+    ) {
+      this.handleDropEnd()
+    }
+  }
+
+  handleDropEnd = () => {
+    this.itemRefs[this.itemPos[this.state.index]].removeEventListener('transitionend', this.handleDropEnd)
+    this.itemRefs[this.itemPos[this.state.index]].removeEventListener('transitionend', this.handleDropTransition)
+
+    const { index, step } = this.state
+
+    this.itemPos = arrayShift(this.itemPos, index, step)
+    this.props.setList(arrayShift(this.props.items, index, step))
+
+    this.setState({ ...initState, index: index + step })
+
+    // Final stage of drop happens in componentDidUpdate
+  }
+
+  render() {
+    const items = this.props.items.map((value, currentIx) => {
+      const draggedIx = this.state.index
+      const currentInDrag = currentIx === draggedIx
+
+      let classes = [CLASSES.DRAGGABLE]
+      let styles = { [this.keywords.start]: 0 }
+
+      if (currentInDrag) {
+        classes.push(CLASSES.IN_DRAG)
+        styles[this.keywords.start] = this.state.offset
+
+        if (this.state.drop) {
+          classes.push(CLASSES.TRANSITION)
+          styles = { ...styles, ...this.transitionStyles }
+        }
+      }
+
+      else if (this.state.drag && !currentInDrag) {
+        if (this.props.allowTransitions) {
+          classes.push(CLASSES.TRANSITION)
+          styles = { ...styles, ...this.transitionStyles }
+        }
+
+        if (inRange(currentIx, draggedIx, draggedIx + this.state.step)) {
+          styles[this.keywords.start] = this.state.step < 0
+            ? this.itemDims[draggedIx][this.keywords.size]
+            : -this.itemDims[draggedIx][this.keywords.size]
+        }
+      }
+
+      return <this.itemComponent
+        key={this.itemPos[currentIx]}
+        item={value}
+
+        style={styles}
+        className={classes.join(' ')}
+
+        addRef={this.addRef}
+        handleDragStart={this.handleDragStart.bind(this, currentIx)}
+
+        inDrag={currentInDrag}
+        mousePos={this.keywords.mousePos}
+      />
+    })
+
+    return <Fragment>{items}</Fragment>
+  }
+
+  // Helper functions ----------------------------------------------------------
+
+  addRef = (ref) => {
     this.itemRefs.push(ref)
   }
 
-  getItemRects = () => {
+  getItemDims = () => {
     const { start, end, size } = this.keywords
-    this.itemRects = this.positions.map(index => {
+    this.itemDims = this.itemPos.map(index => {
       const rect = this.itemRefs[index].getBoundingClientRect()
       return {
         [start]: rect[start],
@@ -80,17 +222,29 @@ class List extends React.Component {
     })
   }
 
-  attachTransitionListeners = () => {
-    this.itemRefs.forEach((item, index) => {
-      item.addEventListener('transitionend', () => {
-        this.inTransition[index] = false
-      })
-    })
+  getOffset = (mousePos) => {
+    return clamp(
+      event[this.keywords.mousePos] - this.state.origin,
+      this.state.offsetLimits.min,
+      this.state.offsetLimits.max
+    )
   }
 
-  handleDragStart = (index, origin) => {
-    if (this.state.drag) { return }
+  getOffsetLimits = (index) => {
+    const { start, end, size } = this.keywords
+    const rects = this.itemDims
 
+    const overflowThreshold = this.props.overflowThreshold
+      ? this.props.overflowThreshold(rects[index][size])
+      : 0
+
+    return {
+      min: rects[0][start] - rects[index][start] - overflowThreshold,
+      max: rects[this.props.items.length - 1][end] - rects[index][end] + overflowThreshold
+    }
+  }
+
+  addDnDEventListeners = () => {
     window.addEventListener('mousemove', this.handleDrag)
     window.addEventListener('touchmove', this.handleDrag)
 
@@ -100,78 +254,9 @@ class List extends React.Component {
     window.addEventListener('pointerup', this.handleDrop)
 
     window.addEventListener('scroll', this.handleDrop)
-
-    this.setState({ index, origin, drag: true })
-    this.neighbors = { prev: index - 1, next: index + 1 }
-
-    const { start, end, size } = this.keywords
-    const rects = this.itemRects
-
-    const overflowThreshold = this.props.overflowThreshold
-      ? this.props.overflowThreshold(rects[index][size])
-      : 0
-
-    this.offsetLimits = {
-      min: rects[0][start] - rects[index][start] - overflowThreshold,
-      max: rects[this.props.items.length - 1][end] - rects[index][end] + overflowThreshold
-    }
   }
 
-  handleDrag = (event) => {
-    const offset = clamp(
-      event[this.keywords.mousePos] - this.state.origin,
-      this.offsetLimits.min,
-      this.offsetLimits.max
-    )
-
-    const prev = this.itemRects[this.neighbors.prev]
-    const next = this.itemRects[this.neighbors.next]
-
-    if (
-      this.neighbors.next < this.props.items.length &&
-      offset - this.state.newOriginOffset >= next.threshold
-    ) { this.swap(this.state.step + 1) }
-
-    else if (
-      this.neighbors.prev > -1 &&
-      offset - this.state.newOriginOffset <= -prev.threshold
-    ) { this.swap(this.state.step - 1) }
-
-    if (offset !== this.state.offset) {
-      this.setState({ offset })
-    }
-  }
-
-  swap = (newStep) => {
-    const { prev, next } = this.neighbors
-    const { size } = this.keywords
-
-    let swapped = {}
-
-    if (newStep > this.state.step) {
-      this.neighbors = { prev: next, next: next + 1 }
-      swapped = { index: next, [size]: this.itemRects[next][size] }
-    } else {
-      this.neighbors = { prev: prev - 1, next: prev }
-      swapped = { index: prev, [size]: -this.itemRects[prev][size] } // Negative size
-    }
-
-    if (newStep === 0) {
-      this.neighbors = { prev: this.state.index - 1, next: this.state.index + 1 }
-    }
-
-    if (this.props.allowTransitions) {
-      this.inTransition[swapped.index] = true
-      this.inTransition.last = swapped.index
-    }
-
-    this.setState({
-      step: newStep,
-      newOriginOffset: this.state.newOriginOffset + swapped[size]
-    })
-  }
-
-  handleDrop = () => {
+  removeDnDEventListeners = () => {
     window.removeEventListener('mousemove', this.handleDrag)
     window.removeEventListener('touchmove', this.handleDrag)
 
@@ -181,95 +266,6 @@ class List extends React.Component {
     window.removeEventListener('pointerup', this.handleDrop)
 
     window.removeEventListener('scroll', this.handleDrop)
-
-
-    if (this.props.allowTransitions) {
-      if (this.state.offset !== this.state.newOriginOffset) {
-        this.itemRefs[this.positions[this.state.index]].addEventListener('transitionend', this.handleDropTransition)
-        this.setState({ drop: true, offset: this.state.newOriginOffset })
-        return
-      } else if (this.inTransition[this.positions[this.inTransition.last]]) {
-        this.itemRefs[this.inTransition.last].addEventListener('transitionend', this.handleDropTransition)
-        return
-      }
-    }
-
-    this.handleDropEnd()
-  }
-
-  handleDropTransition = (element) => {
-    if (
-      element.propertyName === this.keywords.start &&
-      element.target.className.includes(CLASS.DRAGGABLE)
-    ) {
-      this.handleDropEnd()
-    }
-  }
-
-  handleDropEnd = () => {
-    this.itemRefs[this.positions[this.state.index]].removeEventListener('transitionend', this.handleDropEnd)
-    this.itemRefs[this.positions[this.state.index]].removeEventListener('transitionend', this.handleDropTransition)
-
-    if (typeof(this.inTransition.last) !== 'undefined') {
-      this.itemRefs[this.inTransition.last].removeEventListener('transitionend', this.handleDropEnd)
-    }
-
-    const { index, step } = this.state
-
-    this.positions = arrayShift(this.positions, index, step)
-    this.props.setList(arrayShift(this.props.items, index, step))
-    this.inTransition = {}
-
-    this.setState({ ...initState, index: index + step, reload: true })
-  }
-
-  render() {
-    const items = this.props.items.map((value, currentIx) => {
-      const draggedIx = this.state.index
-      const currentInDrag = currentIx === draggedIx
-
-      let classes = [CLASS.DRAGGABLE]
-      let styles = { [this.keywords.start]: 0 }
-
-      if (currentInDrag) {
-        classes.push(CLASS.IN_DRAG)
-        styles[this.keywords.start] = this.state.offset
-
-        if (this.state.drop) {
-          classes.push(CLASS.TRANSITION)
-          styles = { ...styles, ...this.transitionStyles }
-        }
-      }
-
-      else if (this.state.drag && !currentInDrag) {
-        if (this.props.allowTransitions) {
-          classes.push(CLASS.TRANSITION)
-          styles = { ...styles, ...this.transitionStyles }
-        }
-
-        if (inRange(currentIx, draggedIx, draggedIx + this.state.step)) {
-          styles[this.keywords.start] = this.state.step < 0
-            ? this.itemRects[draggedIx][this.keywords.size]
-            : -this.itemRects[draggedIx][this.keywords.size]
-        }
-      }
-
-      return <this.itemComponent
-        key={this.positions[currentIx]}
-        item={value}
-
-        style={styles}
-        className={classes.join(' ')}
-
-        saveRef={this.saveRef}
-        handleDragStart={this.handleDragStart.bind(this, currentIx)}
-
-        inDrag={currentInDrag}
-        mousePos={this.keywords.mousePos}
-      />
-    })
-
-    return <Fragment>{items}</Fragment>
   }
 }
 

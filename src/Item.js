@@ -8,7 +8,7 @@ export const createControlledItem = (Item) => {
     }
 
     componentDidMount() {
-      this.props.saveRef(this.ref.current)
+      this.props.addRef(this.ref.current)
     }
 
     handleDragStart = (event) => {
