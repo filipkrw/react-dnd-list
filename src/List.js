@@ -41,6 +41,8 @@ class List extends React.Component {
     this.inTransition = {}
     this.neighbors = {}
     this.offsetLimits = {}
+
+    this.positions = this.props.items.map((item, index) => index)
   }
 
   componentDidMount() {
@@ -54,6 +56,9 @@ class List extends React.Component {
     if (prevState.drag && !this.state.drag) { // after handleDropEnd()
       this.getItemRects()
     }
+    if (this.state.reload) {
+      this.setState({ ...initState, reload: false })
+    }
   }
 
   saveRef = (ref) => {
@@ -62,8 +67,8 @@ class List extends React.Component {
 
   getItemRects = () => {
     const { start, end, size } = this.keywords
-    this.itemRects = this.itemRefs.map(item => {
-      const rect = item.getBoundingClientRect()
+    this.itemRects = this.positions.map(index => {
+      const rect = this.itemRefs[index].getBoundingClientRect()
       return {
         [start]: rect[start],
         [end]: rect[end],
@@ -180,14 +185,15 @@ class List extends React.Component {
 
     if (this.props.allowTransitions) {
       if (this.state.offset !== this.state.newOriginOffset) {
-        this.itemRefs[this.state.index].addEventListener('transitionend', this.handleDropTransition)
+        this.itemRefs[this.positions[this.state.index]].addEventListener('transitionend', this.handleDropTransition)
         this.setState({ drop: true, offset: this.state.newOriginOffset })
         return
-      } else if (this.inTransition[this.inTransition.last]) {
+      } else if (this.inTransition[this.positions[this.inTransition.last]]) {
         this.itemRefs[this.inTransition.last].addEventListener('transitionend', this.handleDropTransition)
         return
       }
     }
+
     this.handleDropEnd()
   }
 
@@ -201,18 +207,20 @@ class List extends React.Component {
   }
 
   handleDropEnd = () => {
-    this.itemRefs[this.state.index].removeEventListener('transitionend', this.handleDropEnd)
-    this.itemRefs[this.state.index].removeEventListener('transitionend', this.handleDropTransition)
+    this.itemRefs[this.positions[this.state.index]].removeEventListener('transitionend', this.handleDropEnd)
+    this.itemRefs[this.positions[this.state.index]].removeEventListener('transitionend', this.handleDropTransition)
 
     if (typeof(this.inTransition.last) !== 'undefined') {
       this.itemRefs[this.inTransition.last].removeEventListener('transitionend', this.handleDropEnd)
     }
 
-    const newList = arrayShift(this.props.items, this.state.index, this.state.step)
-    this.props.setList(newList)
+    const { index, step } = this.state
 
-    this.setState(initState)
+    this.positions = arrayShift(this.positions, index, step)
+    this.props.setList(arrayShift(this.props.items, index, step))
     this.inTransition = {}
+
+    this.setState({ ...initState, index: index + step, reload: true })
   }
 
   render() {
@@ -247,7 +255,7 @@ class List extends React.Component {
       }
 
       return <this.itemComponent
-        key={currentIx}
+        key={this.positions[currentIx]}
         item={value}
 
         style={styles}
