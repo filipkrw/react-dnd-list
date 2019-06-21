@@ -16,17 +16,18 @@ export const createControlledItem = (Item) => {
     }
 
     render() {
-      return (
-        <Item
-          {...this.props}
-          domRef={this.ref}
-          dragHandlers={{
-            onMouseDown: this.handleDragStart,
-            onTouchStart: this.handleDragStart,
-            onPointerDown: this.handleDragStart
-          }}
-        />
-      )
+      const dndProps = {
+        ref: this.ref,
+        style: this.props.style,
+        classes: this.props.className,
+        dragHandlers: {
+          onMouseDown: this.handleDragStart,
+          onTouchStart: this.handleDragStart,
+          onPointerDown: this.handleDragStart
+        }
+      }
+
+      return <Item item={this.props.item} dnd={dndProps} />
     }
   }
 }
