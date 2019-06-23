@@ -40,13 +40,27 @@ li:last-child {
   border-bottom: none;
 }
 
-.mover {
+.handle {
   display: inline-block;
   padding: 20px 25px;
   margin-right: 10px;
+  cursor: pointer;
+  transition: background-color .3s;
+
+  /* Prevent from blue flash on touchstart in Chrome on Android */
+  -webkit-tap-highlight-color: transparent;
 }
 
-.mover:hover {
+/* .handle:hover {
   background: #111;
   cursor: pointer;
+} */
+
+.handle.active {
+  background: #333;
+}
+
+.val {
+  background: #000;
+  transition: all .5s;
 }

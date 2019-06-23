@@ -34,8 +34,8 @@ class List extends React.Component {
 
     this.itemComponent = createControlledItem(this.props.itemComponent)
     this.keywords = this.props.horizontal
-      ? { start: 'left', end: 'right', size: 'width', inputAxis: 'clientX' }
-      : { start: 'top', end: 'bottom', size: 'height', inputAxis: 'clientY' }
+      ? { start: 'left', end: 'right', size: 'width', inputPos: 'clientX' }
+      : { start: 'top', end: 'bottom', size: 'height', inputPos: 'clientY' }
     this.transitionStyles = this.props.transitionStyles
       ? this.props.transitionStyles
       : {}
@@ -63,8 +63,8 @@ class List extends React.Component {
     this.setDnDEventListeners(window.addEventListener)
 
     const origin = dragInput === 'MOUSE'
-      ? event[this.keywords.inputAxis]
-      : event.touches[0][this.keywords.inputAxis]
+      ? event[this.keywords.inputPos]
+      : event.touches[0][this.keywords.inputPos]
 
     this.setState({
       index, origin, dragInput, drag: true,
@@ -125,7 +125,7 @@ class List extends React.Component {
     this.setDnDEventListeners(window.removeEventListener)
 
     if (
-      this.props.allowTransitions &&
+      !this.props.disableTransitions &&
       Math.abs(this.state.offset - this.state.newOriginOffset) > 1
     ) {
       this.itemRefs[this.itemPos[this.state.index]].addEventListener('transitionend', this.handleDropTransition)
@@ -178,7 +178,7 @@ class List extends React.Component {
       }
 
       else if (this.state.drag && !currentInDrag) {
-        if (this.props.allowTransitions) {
+        if (!this.props.disableTransitions) {
           classes.push(CLASSES.TRANSITION)
           styles = { ...styles, ...this.transitionStyles }
         }
@@ -221,8 +221,8 @@ class List extends React.Component {
         [start]: rect[start],
         [end]: rect[end],
         [size]: rect[size],
-        threshold: this.props.swapThreshold
-          ? this.props.swapThreshold(rect[size])
+        threshold: this.props.setSwapThreshold
+          ? this.props.setSwapThreshold(rect[size])
           : rect[size]
       }
     })
@@ -230,8 +230,8 @@ class List extends React.Component {
 
   getOffset = (event) => {
     const dragPosition = this.state.dragInput === 'MOUSE'
-      ? event[this.keywords.inputAxis]
-      : event.touches[0][this.keywords.inputAxis]
+      ? event[this.keywords.inputPos]
+      : event.touches[0][this.keywords.inputPos]
 
     return clamp(
       dragPosition - this.state.origin,
@@ -244,8 +244,8 @@ class List extends React.Component {
     const { start, end, size } = this.keywords
     const rects = this.itemDims
 
-    const overflowThreshold = this.props.overflowThreshold
-      ? this.props.overflowThreshold(rects[index][size])
+    const overflowThreshold = this.props.setOverflowThreshold
+      ? this.props.setOverflowThreshold(rects[index][size])
       : 0
 
     return {
