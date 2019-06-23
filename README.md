@@ -59,7 +59,7 @@ That's it, you now have a functional drag and drop list!
 You can use one more prop inside your item component: `inDrag`. It's a boolean, set to `true` when the item, you guessed it, is currently being dragged.
 
 ### List component
-There are several props you can pass to `DnDList` to customize the list:
+There are several props you can pass to `DnDList` to customize it:
 
 Name | Type | Default | Description
 --- | --- | --- | ---
