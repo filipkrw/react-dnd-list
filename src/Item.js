@@ -23,9 +23,17 @@ export const createControlledItem = (Item) => {
       }
 
       return <Item
-        item={this.props.item}
-        inDrag={this.props.inDrag}
         dnd={dndProps}
+        
+        item={this.props.item}
+        index={this.props.index}
+        first={this.props.first}
+        last={this.props.last}
+
+        itemInDrag={this.props.itemInDrag}
+        itemInDrop={this.props.itemInDrop}
+        listInDrag={this.props.listInDrag}
+        listInDrop={this.props.listInDrop}
       />
     }
   }

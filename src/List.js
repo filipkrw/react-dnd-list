@@ -190,9 +190,13 @@ class List extends React.Component {
         }
       }
 
+      const itemProps = {
+        itemInDrag: currentInDrag && this.state.drag && !this.state.drop
+
+      }
+
       return <this.itemComponent
         key={this.itemPos[currentIx]}
-        item={value}
 
         style={styles}
         className={classes.join(' ')}
@@ -200,7 +204,15 @@ class List extends React.Component {
         addRef={this.addRef}
         handleDragStart={this.handleDragStart.bind(this, currentIx)}
 
-        inDrag={currentInDrag}
+        item={value}
+        index={currentIx}
+        first={currentIx === 0}
+        last={currentIx === this.props.items.length - 1}
+
+        listInDrag={!currentInDrag && this.state.drag && !this.state.drop}
+        listInDrop={!currentInDrag && this.state.drop}
+        itemInDrag={currentInDrag && this.state.drag && !this.state.drop}
+        itemInDrop={currentInDrag && this.state.drop}
       />
     })
 
