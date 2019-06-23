@@ -22,7 +22,9 @@ const initState = {
   origin: 0,
   offset: 0,
   newOriginOffset: 0,
-  offsetLimits: {}
+  offsetLimits: {},
+
+  dragInput: null, //'MOUSE' or 'TOUCH'
 }
 
 class List extends React.Component {
@@ -32,8 +34,8 @@ class List extends React.Component {
 
     this.itemComponent = createControlledItem(this.props.itemComponent)
     this.keywords = this.props.horizontal
-      ? { start: 'left', end: 'right', size: 'width', mousePos: 'clientX' }
-      : { start: 'top', end: 'bottom', size: 'height', mousePos: 'clientY' }
+      ? { start: 'left', end: 'right', size: 'width', inputAxis: 'clientX' }
+      : { start: 'top', end: 'bottom', size: 'height', inputAxis: 'clientY' }
     this.transitionStyles = this.props.transitionStyles
       ? this.props.transitionStyles
       : {}
@@ -56,21 +58,23 @@ class List extends React.Component {
 
   // Drag and drop functionality -----------------------------------------------
 
-  handleDragStart = (index, origin) => {
+  handleDragStart = (index, event, dragInput) => {
     if (this.state.drag) { return }
-
     this.setDnDEventListeners(window.addEventListener)
 
+    const origin = dragInput === 'MOUSE'
+      ? event[this.keywords.inputAxis]
+      : event.touches[0][this.keywords.inputAxis]
+
     this.setState({
-      index, origin,
-      drag: true,
+      index, origin, dragInput, drag: true,
       nearbyItems: { prev: index - 1, next: index + 1 },
       offsetLimits: this.getOffsetLimits(index)
     })
   }
 
   handleDrag = (event) => {
-    const offset = this.getOffset(event[this.keywords.mousePos])
+    const offset = this.getOffset(event)
 
     const prev = this.itemDims[this.state.nearbyItems.prev]
     const next = this.itemDims[this.state.nearbyItems.next]
@@ -120,7 +124,10 @@ class List extends React.Component {
   handleDrop = () => {
     this.setDnDEventListeners(window.removeEventListener)
 
-    if (this.props.allowTransitions && this.state.offset !== this.state.newOriginOffset) {
+    if (
+      this.props.allowTransitions &&
+      Math.abs(this.state.offset - this.state.newOriginOffset) > 1
+    ) {
       this.itemRefs[this.itemPos[this.state.index]].addEventListener('transitionend', this.handleDropTransition)
       this.setState({ drop: true, offset: this.state.newOriginOffset })
     } else {
@@ -194,7 +201,6 @@ class List extends React.Component {
         handleDragStart={this.handleDragStart.bind(this, currentIx)}
 
         inDrag={currentInDrag}
-        mousePos={this.keywords.mousePos}
       />
     })
 
@@ -222,9 +228,13 @@ class List extends React.Component {
     })
   }
 
-  getOffset = (mousePos) => {
+  getOffset = (event) => {
+    const dragPosition = this.state.dragInput === 'MOUSE'
+      ? event[this.keywords.inputAxis]
+      : event.touches[0][this.keywords.inputAxis]
+
     return clamp(
-      event[this.keywords.mousePos] - this.state.origin,
+      dragPosition - this.state.origin,
       this.state.offsetLimits.min,
       this.state.offsetLimits.max
     )
@@ -249,11 +259,9 @@ class List extends React.Component {
     listenerFunction('touchmove', this.handleDrag)
 
     listenerFunction('mouseup', this.handleDrop)
+    listenerFunction('scroll', this.handleDrop)
     listenerFunction('touchend', this.handleDrop)
     listenerFunction('touchcancel', this.handleDrop)
-    listenerFunction('pointerup', this.handleDrop)
-
-    listenerFunction('scroll', this.handleDrop)
   }
 }
 

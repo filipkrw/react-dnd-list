@@ -11,23 +11,22 @@ export const createControlledItem = (Item) => {
       this.props.addRef(this.ref.current)
     }
 
-    handleDragStart = (event) => {
-      this.props.handleDragStart(event[this.props.mousePos])
-    }
-
     render() {
       const dndProps = {
         ref: this.ref,
-        style: this.props.style,
+        styles: this.props.style,
         classes: this.props.className,
         dragHandlers: {
-          onMouseDown: this.handleDragStart,
-          onTouchStart: this.handleDragStart,
-          onPointerDown: this.handleDragStart
+          onMouseDown: (event) => this.props.handleDragStart(event, 'MOUSE'),
+          onTouchStart: (event) => this.props.handleDragStart(event, 'TOUCH')
         }
       }
 
-      return <Item item={this.props.item} dnd={dndProps} />
+      return <Item
+        item={this.props.item}
+        inDrag={this.props.inDrag}
+        dnd={dndProps}
+      />
     }
   }
 }
