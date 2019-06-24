@@ -10,6 +10,11 @@ const CLASSES = {
   TRANSITION: 'dnd-list__transition'
 }
 
+const KEYWORDS = {
+  HORIZONTAL: { start: 'left', end: 'right', size: 'width', inputPos: 'clientX' },
+  VERTICAL: { start: 'top', end: 'bottom', size: 'height', inputPos: 'clientY' }
+}
+
 const initState = {
   // List controll
   drag: false,
@@ -33,9 +38,7 @@ class List extends React.Component {
     this.state = initState
 
     this.itemComponent = createControlledItem(this.props.itemComponent)
-    this.keywords = this.props.horizontal
-      ? { start: 'left', end: 'right', size: 'width', inputPos: 'clientX' }
-      : { start: 'top', end: 'bottom', size: 'height', inputPos: 'clientY' }
+    this.getKeywords()
     this.transitionStyles = this.props.transitionStyles
       ? this.props.transitionStyles
       : {}
@@ -51,8 +54,13 @@ class List extends React.Component {
 
   componentDidUpdate(prevProps, prevState) {
     if (prevState.drag && !this.state.drag) { // after handleDropEnd
-      this.getItemDims()
       this.setState(initState)
+      this.getItemDims()
+    }
+
+    if (prevProps.horizontal !== this.props.horizontal) {
+      this.getKeywords()
+      this.getItemDims()
     }
   }
 
@@ -225,10 +233,18 @@ class List extends React.Component {
     this.itemRefs.push(ref)
   }
 
+  getKeywords = () => {
+    this.keywords = this.props.horizontal
+      ? KEYWORDS.HORIZONTAL
+      : KEYWORDS.VERTICAL
+  }
+
   getItemDims = () => {
     const { start, end, size } = this.keywords
+
     this.itemDims = this.itemPos.map(index => {
       const rect = this.itemRefs[index].getBoundingClientRect()
+
       return {
         [start]: rect[start],
         [end]: rect[end],
@@ -254,15 +270,15 @@ class List extends React.Component {
 
   getOffsetLimits = (index) => {
     const { start, end, size } = this.keywords
-    const rects = this.itemDims
+    const dims = this.itemDims
 
     const overflowThreshold = this.props.setOverflowThreshold
-      ? this.props.setOverflowThreshold(rects[index][size])
+      ? this.props.setOverflowThreshold(dims[index][size])
       : 0
 
     return {
-      min: rects[0][start] - rects[index][start] - overflowThreshold,
-      max: rects[this.props.items.length - 1][end] - rects[index][end] + overflowThreshold
+      min: dims[0][start] - dims[index][start] - overflowThreshold,
+      max: dims[this.props.items.length - 1][end] - dims[index][end] + overflowThreshold
     }
   }
 
