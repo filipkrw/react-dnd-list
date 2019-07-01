@@ -4,6 +4,10 @@ export const CLASSES = {
   TRANSITION: 'dnd-list__transition'
 }
 
+export const STYLES = {
+  HANDLER: { touchAction: 'none' }
+}
+
 export const KEYWORDS = {
   HORIZONTAL: { start: 'left', end: 'right', size: 'width', axis: 'X' },
   VERTICAL: { start: 'top', end: 'bottom', size: 'height', axis: 'Y' }

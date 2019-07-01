@@ -1,7 +1,6 @@
 .dnd-list__draggable {
   position: relative;
   z-index: 1973;
-  touch-action: none;
 }
 
 .dnd-list__in-drag {

@@ -1,5 +1,5 @@
 import React from 'react'
-import { INPUTS } from './consts'
+import { INPUTS, STYLES } from './consts'
 
 export const createControlledItem = (Item) => {
   return class extends React.Component {
@@ -14,12 +14,17 @@ export const createControlledItem = (Item) => {
 
     render() {
       const dndProps = {
-        ref: this.ref,
-        styles: this.props.style,
-        classes: this.props.className,
-        dragHandlers: {
-          onMouseDown: (event) => this.props.handleDragStart(event, INPUTS.MOUSE),
-          onTouchStart: (event) => this.props.handleDragStart(event, INPUTS.TOUCH)
+        item: {
+          ref: this.ref,
+          classes: this.props.className,
+          styles: this.props.style
+        },
+        handler: {
+          styles: STYLES.HANDLER,
+          listeners: {
+            onMouseDown: (event) => this.props.handleDragStart(event, INPUTS.MOUSE),
+            onTouchStart: (event) => this.props.handleDragStart(event, INPUTS.TOUCH)
+          }
         }
       }
 
