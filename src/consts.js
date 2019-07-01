@@ -5,8 +5,8 @@ export const CLASSES = {
 }
 
 export const KEYWORDS = {
-  HORIZONTAL: { start: 'left', end: 'right', size: 'width', inputPos: 'clientX' },
-  VERTICAL: { start: 'top', end: 'bottom', size: 'height', inputPos: 'clientY' }
+  HORIZONTAL: { start: 'left', end: 'right', size: 'width', axis: 'X' },
+  VERTICAL: { start: 'top', end: 'bottom', size: 'height', axis: 'Y' }
 }
 
 export const INPUTS = {

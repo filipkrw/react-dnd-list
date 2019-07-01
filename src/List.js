@@ -11,7 +11,7 @@ const initState = {
   drop: false,
   step: 0,
   lastSwapped: null,
-  nearbyItems: {},
+  neighborIds: {},
 
   // Dragged element controll
   index: null,
@@ -62,35 +62,32 @@ class List extends React.Component {
     if (this.state.drag) { return }
     this.setDnDEventListeners(window.addEventListener)
 
-    const origin = dragInput === INPUTS.MOUSE
-      ? event[this.keywords.inputPos]
-      : event.touches[0][this.keywords.inputPos]
-
     this.setState({
-      index, origin, dragInput, drag: true,
-      nearbyItems: { prev: index - 1, next: index + 1 },
-      offsetLimits: this.getOffsetLimits(index)
+      index, dragInput, drag: true,
+      origin: this.getEventPosition(event, dragInput),
+      offsetLimits: this.getOffsetLimits(index),
+      neighborIds: { prev: index - 1, next: index + 1 }
     })
   }
 
   handleDrag = (event) => {
     const offset = this.getOffset(event)
 
-    const prev = this.itemDims[this.state.nearbyItems.prev]
-    const next = this.itemDims[this.state.nearbyItems.next]
+    const prev = this.itemDims[this.state.neighborIds.prev]
+    const next = this.itemDims[this.state.neighborIds.next]
 
     if (
-      this.state.nearbyItems.next < this.props.items.length &&
+      this.state.neighborIds.next < this.props.items.length &&
       offset - this.state.newOriginOffset >= next.threshold
     ) {
-      this.swap(this.state.step + 1)
+      this.handleSwap(this.state.step + 1)
     }
 
     else if (
-      this.state.nearbyItems.prev > -1 &&
+      this.state.neighborIds.prev > -1 &&
       offset - this.state.newOriginOffset <= -prev.threshold
     ) {
-      this.swap(this.state.step - 1)
+      this.handleSwap(this.state.step - 1)
     }
 
     if (offset !== this.state.offset) {
@@ -98,30 +95,30 @@ class List extends React.Component {
     }
   }
 
-  swap = (newStep) => {
-    const { prev, next } = this.state.nearbyItems
+  handleSwap = (newStep) => {
+    const { prev, next } = this.state.neighborIds
     const { size } = this.keywords
 
-    let newNearbyItems = {}
+    let newneighborIds = {}
     let swappedItem = {}
 
     if (newStep > this.state.step) {
-      newNearbyItems = { prev: next, next: next + 1 }
+      newneighborIds = { prev: next, next: next + 1 }
       swappedItem = { index: next, size: this.itemDims[next][size] }
     } else {
-      newNearbyItems = { prev: prev - 1, next: prev }
+      newneighborIds = { prev: prev - 1, next: prev }
       swappedItem = { index: prev, size: -this.itemDims[prev][size] } // Negative size
     }
 
     if (newStep === 0) {
-      newNearbyItems = { prev: this.state.index - 1, next: this.state.index + 1 }
+      newneighborIds = { prev: this.state.index - 1, next: this.state.index + 1 }
     }
 
     this.setState({
       step: newStep,
       newOriginOffset: this.state.newOriginOffset + swappedItem.size,
       lastSwapped: swappedItem.index,
-      nearbyItems: newNearbyItems
+      neighborIds: newneighborIds
     })
   }
 
@@ -153,10 +150,9 @@ class List extends React.Component {
   }
 
   handleDropTransition = (element) => {
-    // Transition events bubble up, make sure to fire `handleDropEnd`
-    // after the end of the position transition of the dragged element
+    // Did you know `transitionend` events bubble up?
     if (
-      element.propertyName === this.keywords.start &&
+      element.propertyName === 'transform' &&
       element.target.className.includes(CLASSES.DRAGGABLE)
     ) {
       this.handleDropEnd()
@@ -189,11 +185,11 @@ class List extends React.Component {
       const currentInDrag = currentIx === draggedIx
 
       let classes = [CLASSES.DRAGGABLE]
-      let styles = { [this.keywords.start]: 0 }
+      let styles = {}
 
       if (currentInDrag) {
         classes.push(CLASSES.IN_DRAG)
-        styles[this.keywords.start] = this.state.offset
+        styles.transform = this.getTransform(this.state.offset)
 
         if (this.state.drop) {
           classes.push(CLASSES.TRANSITION)
@@ -208,9 +204,9 @@ class List extends React.Component {
         }
 
         if (inRange(currentIx, draggedIx, draggedIx + this.state.step)) {
-          styles[this.keywords.start] = this.state.step < 0
-            ? this.itemDims[draggedIx][this.keywords.size]
-            : -this.itemDims[draggedIx][this.keywords.size]
+          styles.transform = this.state.step < 0
+            ? this.getTransform(this.itemDims[draggedIx][this.keywords.size])
+            : this.getTransform(-this.itemDims[draggedIx][this.keywords.size])
         }
       }
 
@@ -273,9 +269,7 @@ class List extends React.Component {
   }
 
   getOffset = (event) => {
-    const dragPosition = this.state.dragInput === INPUTS.MOUSE
-      ? event[this.keywords.inputPos]
-      : event.touches[0][this.keywords.inputPos]
+    const dragPosition = this.getEventPosition(event)
 
     return clamp(
       dragPosition - this.state.origin,
@@ -296,6 +290,17 @@ class List extends React.Component {
       min: dims[0][start] - dims[index][start] - overflowThreshold,
       max: dims[this.props.items.length - 1][end] - dims[index][end] + overflowThreshold
     }
+  }
+
+  getTransform = (offset) => {
+    return `translate${this.keywords.axis}(${offset}px)`
+  }
+
+  getEventPosition = (event, dragInput = null) => {
+    const client = `client${this.keywords.axis}`
+    return (dragInput || this.state.dragInput) === INPUTS.MOUSE
+      ? event[client]
+      : event.touches[0][client]
   }
 
   setDnDEventListeners = (listenerFunction) => {
