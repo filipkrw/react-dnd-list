@@ -1,4 +1,5 @@
 import React from 'react'
+import { INPUTS } from './consts'
 
 export const createControlledItem = (Item) => {
   return class extends React.Component {
@@ -17,8 +18,8 @@ export const createControlledItem = (Item) => {
         styles: this.props.style,
         classes: this.props.className,
         dragHandlers: {
-          onMouseDown: (event) => this.props.handleDragStart(event, 'MOUSE'),
-          onTouchStart: (event) => this.props.handleDragStart(event, 'TOUCH')
+          onMouseDown: (event) => this.props.handleDragStart(event, INPUTS.MOUSE),
+          onTouchStart: (event) => this.props.handleDragStart(event, INPUTS.TOUCH)
         }
       }
 
