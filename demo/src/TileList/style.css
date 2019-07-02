@@ -1,0 +1,43 @@
+.tile-list {
+  list-style: none;
+  padding: 5px 0;
+  margin: 0;
+}
+
+.tile-list li {
+  padding: 5px 0;
+}
+
+.tile-list .el {
+  display: flex;
+  align-items: center;
+
+  padding: 0 30px;
+  border-radius: 5px;
+
+  transition: background-color .3s;
+  cursor: pointer;
+}
+
+.blue .el {
+  background: #007c99;
+}
+
+.pink .el {
+  background: #7d6b91;
+}
+
+.tile-list .active {
+  background: #fff;
+  color: #000;
+}
+
+@media screen and (max-width: 740px) {
+  .tile-list {
+    padding-bottom: 0;
+  }
+
+  .tile-list li {
+    padding-bottom: 5px;
+  }
+}

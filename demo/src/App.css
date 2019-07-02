@@ -3,64 +3,25 @@ html {
 }
 
 body {
-  background: #000;
-  color: #fff;
-  height: 110%;
-  font-family: sans-serif;
+	font-family: sans-serif;
+  margin: 0;
+	background: #000;
+	color: #fff;
+	height: 100%;
 }
 
-ul {
-  list-style: none;
-  padding: 0;
-  margin: 20px;
-  border: 1px solid #333;
-  border-radius: 4px;
-  overflow: hidden;
-  background: #111;
-  /* display: flex; */
-
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  ser-select: none;
-}
-
-li {
-  border-bottom: 1px solid #333;
-  border-top: 1px solid #333;
-  background: #000;
+#root {
+  height: 100%;
+  min-width: 300px;
 
   display: flex;
   align-items: center;
+  flex-direction: column;
 }
 
-li:last-child {
-  border-bottom: none;
-}
-
-.handle {
-  display: inline-block;
-  padding: 20px 25px;
-  margin-right: 10px;
-  cursor: pointer;
-  transition: background-color .3s;
-
-  /* Prevent from blue flash on touchstart in Chrome on Android */
-  -webkit-tap-highlight-color: transparent;
-}
-
-/* .handle:hover {
-  background: #111;
-  cursor: pointer;
-} */
-
-.handle.active {
-  background: #333;
-}
-
-.val {
-  background: #000;
-  transition: all .5s;
+.no-select {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }

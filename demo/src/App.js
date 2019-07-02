@@ -1,41 +1,22 @@
-import React, { Fragment, useState } from 'react'
+import React, { Fragment } from 'react'
 import './App.css'
 
-import List from 'react-dnd-list'
-
-const Item = (props) => {
-  const dnd = props.dnd
-  const handleClasses = props.inDrag ? 'handle active' : 'handle'
-
-  return (
-    <li
-      style={dnd.styles}
-      className={dnd.classes}
-      ref={dnd.ref}
-    >
-      <div
-        className={handleClasses}
-        {...dnd.dragHandlers}
-      >=</div>
-      <span className="val">{props.item}</span>
-    </li>
-  )
-}
+import Demo from './Demo'
+import Bar from './Bar'
 
 const App = () => {
-  const [list, setList] = useState(['1', '2', '3', '4', '5'])
-
   return (
     <Fragment>
-      <ul>
-        <List
-          items={list}
-          itemComponent={Item}
-          setList={setList}
-          setSwapThreshold={(size) => size * .75}
-          setOverflowThreshold={(size) => size * .2}
-        />
-      </ul>
+      <Bar className="top">
+        <a href="#">React DnD List Demo</a>
+        <a href="https://github.com/atmhrt/react-dnd-list">GitHub</a>
+      </Bar>
+
+      <Demo />
+
+      <Bar className="bottom">
+        <a href="https://github.com/atmhrt">{'<3'}</a>
+      </Bar>
     </Fragment>
   )
 }
