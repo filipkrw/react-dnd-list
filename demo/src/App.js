@@ -8,7 +8,7 @@ const App = () => {
   return (
     <Fragment>
       <Bar className="top">
-        <a href="#">React DnD List Demo</a>
+        <a href="https://atmhrt.github.io/react-dnd-list">React DnD List Demo</a>
         <a href="https://github.com/atmhrt/react-dnd-list">GitHub</a>
       </Bar>
 
