@@ -70,7 +70,7 @@ There are several props you can pass to `DnDList` to customize it:
 
 Name | Type | Default | Description
 --- | --- | --- | ---
-horizontal | boolean | false | Let's you swap items horizontally, from left to right, if set to `true`.
+horizontal | boolean | false | Let's you swap items horizontally if set to `true`.
 transitionStyles | object | – | Let's you override default CSS transition styles, for example `{ transtitionDuration: '0.5s' }`.
 disableTransitions | boolean | false | Disables swap transitions if set to `true`.
 
