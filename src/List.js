@@ -189,7 +189,11 @@ class List extends React.Component {
 
       if (currentInDrag) {
         classes.push(CLASSES.IN_DRAG)
-        styles.transform = this.getTransform(this.state.offset)
+
+        // Prevent from a little stutter on 0 offset
+        if (this.state.offset !== 0) {
+          styles.transform = this.getTransform(this.state.offset)
+        }
 
         if (this.state.drop) {
           classes.push(CLASSES.TRANSITION)

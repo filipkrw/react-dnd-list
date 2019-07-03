@@ -33,20 +33,20 @@ const Demo = () => {
   const TileList1 = <TileList
     color="blue"
     items={[
-      { value: 1, height: 100 },
-      { value: 2, height: 75 },
-      { value: 3, height: 125 },
-      { value: 4, height: 75 },
-      { value: 5, height: 75 }
+      { value: 1, height: 125 },
+      { value: 2, height: 125 },
+      { value: 3, height: 75 },
+      { value: 4, height: 75 }
     ]}
   />
 
   const TileList2 = <TileList
     color="pink"
     items={[
-      { value: 1, height: 100 },
+      { value: 1, height: 75 },
       { value: 2, height: 75 },
-      { value: 3, height: 150 }
+      { value: 3, height: 125 },
+      { value: 4, height: 75 }
     ]}
   />
 
