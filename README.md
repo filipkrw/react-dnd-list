@@ -54,9 +54,9 @@ You need to provide `DnDList` with an array of items, its update function, and t
 
 That's it, you now have a functional drag and drop list!
 
-# Customization
+# Mini Docs
 ### Item component
-You have access to few more props inside your item component:
+You have access to a few more props inside your item component:
 
 Name | Types | Description
 --- | --- | ---
@@ -79,7 +79,7 @@ Function props:
 
 Name | Args | Returns | Description
 --- | --- | --- | ---
-setSwapThreshold | size (number) | number | Let's you set a swap threshold for every item in the list individually, based on their size (height or width, depending on the type of the list). For example `(size) => size * 0.5` will result in elements being swapped after the dragged element has traversed more than 50% of their size.
+setSwapThreshold | size (number) | number | Let's you set a swap threshold for every item in the list individually, based on their size (height or width, depending on the type of the list). For example `size => size * 0.5` will result in elements being swapped after the dragged element has traversed more than 50% of their size.
 setOverflowThreshold | size (number) | number | Function similar to `setSwapThreshold`. Let's you set how far the dragged item can be moved over the list container bounds, based on its (the dragged item) size.
 
 
