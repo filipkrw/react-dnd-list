@@ -28,11 +28,7 @@ const Item = props => {
   )
 }
 ```
-<<<<<<< HEAD
 `dnd` props are essential for the drag and drop functionality. Assign `dnd.item.styles`, `dnd.item.classes`, and `dnd.item.ref` to the outer DOM component. Do not override `transform` and `transition` styles of that component!
-=======
-`dnd` props are essential for the drag and drop functionality. Assign `dnd.item.styles`, `dnd.item.classes`, and `dnd.item.ref` to the outer DOM component. Do not override `transform` and `transition` styles of that component! 
->>>>>>> baa96a5b51e2b170cafff78e3ae20414a360cbbd
 
 `dnd.handler.listeners` is an object containing two keys: `onMouseDown` and `onTouchStart`, with appropriate functions as values. Together with `dnd.handler.styles`, assign it to a component that will initiate drag on click or touch.
 
@@ -75,7 +71,7 @@ There are several props you can pass to `DnDList` to customize it:
 Name | Type | Default | Description
 --- | --- | --- | ---
 horizontal | boolean | false | Let's you swap items horizontally if set to `true`.
-transitionStyles | object | – | Let's you override default CSS transition styles, for example `{ transtitionDuration: '0.5s' }`.
+transitionStyles | object | – | Let's you override default CSS transition styles, for example `{ transtitionDuration: '.5s' }`.
 disableTransitions | boolean | false | Disables swap transitions if set to `true`.
 
 Function props:
