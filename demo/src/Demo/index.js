@@ -31,7 +31,6 @@ const Item = props => {
 
 const Demo = () => {
   const TileList1 = <TileList
-    color="blue"
     items={[
       { value: 1, height: 125 },
       { value: 2, height: 125 },
@@ -41,7 +40,6 @@ const Demo = () => {
   />
 
   const TileList2 = <TileList
-    color="pink"
     items={[
       { value: 1, height: 75 },
       { value: 2, height: 75 },

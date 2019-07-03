@@ -30,7 +30,7 @@ const List = props => {
   const [list, setList] = useState(props.items)
 
   return (
-    <ul className={'tile-list ' + props.color}>
+    <ul className="tile-list">
       <DnDList
         items={list}
         itemComponent={Item}
