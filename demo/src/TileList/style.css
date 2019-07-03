@@ -9,7 +9,7 @@
 }
 
 .tile-list .el {
-  background: #0b7189
+  background: #0b7189;
 
   display: flex;
   align-items: center;
