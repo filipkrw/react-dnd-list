@@ -34,6 +34,8 @@ const Item = props => {
 
 The `item` prop is just a value from your array of items (look below).
 
+**Warning!** Do not use margins on item components – use padding instead. Support for margins will be added in near future.
+
 ### Create your list component:
 ```
 const MyList = () => {
@@ -53,8 +55,6 @@ const MyList = () => {
 You need to provide `DnDList` with an array of items, its update function, and the item component (the one we created earlier).
 
 That's it, you now have a functional drag and drop list!
-
-**Warning!** Margins on items cause several issues. Do not use them. This bug will be fixed soon.
 
 # Customization
 ### Item component
