@@ -54,7 +54,9 @@ You need to provide `DnDList` with an array of items, its update function, and t
 
 That's it, you now have a functional drag and drop list!
 
-# Mini Docs
+**Warning!** Margins on items cause several issues. Do not use them. This bug will be fixed soon.
+
+# Customization
 ### Item component
 You have access to a few more props inside your item component:
 
