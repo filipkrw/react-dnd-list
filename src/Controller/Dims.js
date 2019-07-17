@@ -1,6 +1,30 @@
+import { KEYWORDS } from '../consts'
+
 class Dims {
-  constructor(items) {
-    this.setAll(items)
+  constructor(refs, horizontal = false) {
+    this.setDims(refs, horizontal)
+  }
+
+  setDims = (refs, horizontal) => {
+    this.setKeywords(horizontal)
+    this.setItems(refs)
+  }
+
+  setKeywords = horizontal => {
+    this.keywords = horizontal ? KEYWORDS.HORIZONTAL : KEYWORDS.VERTICAL
+  }
+
+  setItems = refs => {
+    const { start, end } = this.keywords
+
+    this.items = refs.map(ref => {
+      const rect = ref.getBoundingClientRect()
+      return {
+        start: rect[start],
+        end: rect[end],
+        offset: 0
+      }
+    })
   }
 
   swap = (indexA, indexB) => {
@@ -25,9 +49,6 @@ class Dims {
       item.offset = 0
     })
   }
-
-  setAll = items => this.items = items
-  getAll = () => this.items
 }
 
 export default Dims
