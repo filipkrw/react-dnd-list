@@ -2,7 +2,7 @@
 Light and customizable drag and drop list for React, with no additional dependencies.
 
 # Demo
-Check out [the demo page here](https://atmhrt.github.io/react-dnd-list)! See the code in the `demo` directory of this repo.
+Check out [the demo page here](https://flpkraw.github.io/react-dnd-list)! See the code in the `demo` directory of this repo.
 
 # Getting started
 ### Install:
