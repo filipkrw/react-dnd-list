@@ -1,6 +1,6 @@
 {
   "name": "react-dnd-list",
-  "version": "1.2.1",
+  "version": "1.2.3",
   "description": "Light and customizable drag and drop list for React",
   "main": "./build/index.js",
   "peerDependencies": {
@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/atmhrt/react-dnd-list.git"
+    "url": "git+https://github.com/flpkraw/react-dnd-list.git"
   },
   "keywords": [
     "react",
@@ -24,9 +24,9 @@
   "author": "Filip Krawczyk",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/atmhrt/react-dnd-list/issues"
+    "url": "https://github.com/flpkraw/react-dnd-list/issues"
   },
-  "homepage": "https://github.com/atmhrt/react-dnd-list#readme",
+  "homepage": "https://github.com/flpkraw/react-dnd-list#readme",
   "dependencies": {
     "react": "^16.8.6"
   },
